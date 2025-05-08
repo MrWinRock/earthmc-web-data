@@ -1,6 +1,5 @@
 export interface PlayerBasic {
   name: string;
-  name: string;
   uuid: string;
 }
 
