@@ -1,5 +1,5 @@
-// filepath: d:\Coding\earthmc-web-data\src\types\playerTypes.ts
 export interface PlayerBasic {
+  name: string;
   name: string;
   uuid: string;
 }
