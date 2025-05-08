@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import './../components.css'
+import './../Components.css'
 import axios from 'axios';
 
 interface ApiData {
@@ -52,7 +52,7 @@ const getMoonPhaseEmoji = (moonPhase: string): string => {
         case 'WANING_CRESCENT':
             return '🌘';
         default:
-            return ''; // Or a default emoji/icon
+            return '';
     }
 };
 
