@@ -5,6 +5,9 @@ import axios from 'axios';
 import type { PlayerDetailed, PlayerBasic } from '../../interfaces/player';
 import PlayerModal from './PlayerModal'; // Import the modal
 
+// Determine the API base URL based on the environment
+const API_BASE_URL = import.meta.env.DEV ? '/api' : 'https://api.earthmc.net';
+
 const Players = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchedPlayerData, setSearchedPlayerData] = useState<PlayerDetailed[] | null>(null);
@@ -34,7 +37,7 @@ const Players = () => {
             setLoadingAllPlayers(true);
             setErrorAllPlayers(null);
             try {
-                const response = await axios.get<PlayerBasic[]>('/api/v3/aurora/players');
+                const response = await axios.get<PlayerBasic[]>(`${API_BASE_URL}/v3/aurora/players`);
                 setAllPlayers(response.data);
             } catch (err: unknown) {
                 if (err instanceof Error) {
@@ -61,7 +64,7 @@ const Players = () => {
         setSearchedPlayerData(null);
 
         try {
-            const response = await axios.post<PlayerDetailed[]>('/api/v3/aurora/players', {
+            const response = await axios.post<PlayerDetailed[]>(`${API_BASE_URL}/v3/aurora/players`, {
                 query: [searchQuery.trim()]
             });
             if (response.data && response.data.length > 0) {
@@ -89,7 +92,7 @@ const Players = () => {
         setErrorModalPlayer(null);
         setModalPlayer(null);
         try {
-            const response = await axios.post<PlayerDetailed[]>('/api/v3/aurora/players', {
+            const response = await axios.post<PlayerDetailed[]>(`${API_BASE_URL}/v3/aurora/players`, {
                 query: [playerIdentifier]
             });
             if (response.data && response.data.length > 0) {
