@@ -6,7 +6,7 @@ import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename="/earthmc-web-data">
+    <BrowserRouter basename="/earthmc-web-data/">
       <App />
     </BrowserRouter>
   </StrictMode>,
