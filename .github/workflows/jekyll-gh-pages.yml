@@ -1,10 +1,16 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
-name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+# Sample workflow for building and deploying a Vite site to GitHub Pages
+name: Deploy Vite site to GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: ["master"]
+    branches:
+      - master
+
+      # Runs on pull requests targeting the release branch
+  pull_request:
+    branches:
+      - master
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -28,15 +34,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # Specify your Node.js version, check your project's requirements
+          cache: "npm"
+      - name: Install dependencies
+        run: npm install
+      - name: Build
+        run: npm run build # This runs "tsc -b && vite build" from your package.json
       - name: Setup Pages
         uses: actions/configure-pages@v5
-      - name: Build with Jekyll
-        uses: actions/jekyll-build-pages@v1
-        with:
-          source: ./
-          destination: ./_site
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire directory
+          path: "./dist" # Vite builds to the 'dist' directory by default
 
   # Deployment job
   deploy:
