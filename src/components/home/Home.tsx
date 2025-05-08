@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import './../components.css'
+import './../Components.css'
 import axios from 'axios';
 
 interface ApiData {
