@@ -15,14 +15,14 @@ const NavBar = () => {
 
     return (
         <nav>
-            <h1>EarthMC Web Data</h1>
+            <h1><Link to="/">EarthMC Web Data</Link></h1>
             <div className="menu-toggle" onClick={toggleMenu}>
                 <div></div>
                 <div></div>
                 <div></div>
             </div>
             <ul className={menuOpen ? 'open' : ''}>
-                <li><Link to="/" onClick={closeMenu}>Home</Link></li>
+                <li><Link to="/" onClick={closeMenu}>Status</Link></li>
                 <li><Link to="/players" onClick={closeMenu}>Players</Link></li>
                 <li><Link to="/towns" onClick={closeMenu}>Towns</Link></li>
                 <li><Link to="/nations" onClick={closeMenu}>Nations</Link></li>
