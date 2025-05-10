@@ -39,7 +39,7 @@ const TownModal: React.FC<TownModalProps> = ({ town, isOpen, onClose }) => {
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close-button button" onClick={onClose}>X</button>
+                <button className="modal-close-button button" onClick={onClose} aria-label="Close modal">X</button>
                 <h2>{town.name}</h2>
                 <a href={mapLink} target="_blank" rel="noopener noreferrer">
                     View on Map

@@ -25,7 +25,7 @@ const Towns = () => {
     const [loadingModalTown, setLoadingModalTown] = useState(false);
     const [errorModalTown, setErrorModalTown] = useState<Error | null>(null);
 
-    const toggleRawSearchedData = () => {
+    const toggleRawSearchedData: () => void = () => {
         setShowRawSearchedData(prev => !prev);
     };
 
@@ -60,8 +60,6 @@ const Towns = () => {
             const response = await axios.post<TownDetailed[]>(`${API_BASE_URL}/v3/aurora/towns`, {
                 query: [searchQuery.trim()]
             });
-
-            console.log('API Response:', response.data);
 
             if (response.data) {
                 setSearchedTownData(response.data);
