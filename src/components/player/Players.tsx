@@ -3,9 +3,8 @@ import type { FormEvent } from 'react';
 import './../Components.css'
 import axios from 'axios';
 import type { PlayerDetailed, PlayerBasic } from '../../interfaces/player';
-import PlayerModal from './PlayerModal'; // Import the modal
+import PlayerModal from './PlayerModal';
 
-// Determine the API base URL based on the environment
 const API_BASE_URL = import.meta.env.DEV ? '/api' : 'https://api.earthmc.net';
 
 const Players = () => {
