@@ -77,6 +77,16 @@ export interface TownResident {
   uuid: string;
 }
 
+export interface TownQuarter {
+  name: string;
+  uuid: string;
+}
+
+export interface TownRank {
+  name: string;
+  uuid: string;
+}
+
 export interface TownDetailed extends TownBasic {
   board: string | null;
   founder: string;
@@ -85,12 +95,12 @@ export interface TownDetailed extends TownBasic {
   nation: TownNation;
   timestamps: TownTimestamps;
   status: TownStatus;
-  stats: TownStats;
+  stats: TownStats & { bonusBlocks: number };
   perms: TownPerms;
   coordinates: TownCoordinates;
   residents: TownResident[];
   trusted: TownResident[];
   outlaws: TownResident[];
-  quarters: string[];
-  ranks: Record<string, string[]>;
+  quarters: TownQuarter[];
+  ranks: Record<string, TownRank[]>;
 }

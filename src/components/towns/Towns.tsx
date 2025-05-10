@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import axios from 'axios';
-import type { TownBasic, TownDetailed } from '../../interfaces/town'
+import type { TownBasic, TownDetailed } from '../../interfaces/town';
 import TownModal from './TownModal';
 import './../Components.css';
 
@@ -61,6 +61,8 @@ const Towns = () => {
                 query: [searchQuery.trim()]
             });
 
+            console.log('API Response:', response.data);
+
             if (response.data) {
                 setSearchedTownData(response.data);
                 if (response.data.length === 1) {
@@ -70,7 +72,6 @@ const Towns = () => {
                 setSearchedTownData([]);
             }
         } catch (err) {
-
             setSearchedTownData(null);
             setErrorSearch(err instanceof Error ? err : new Error(String(err ?? 'Search failed')));
         } finally {
@@ -142,24 +143,20 @@ const Towns = () => {
                         </button>
                     </div>
 
-                    {showRawSearchedData ? (
-                        <pre>{JSON.stringify(searchedTownData, null, 2)}</pre>
+                    {Array.isArray(searchedTownData) && searchedTownData.length > 0 ? (
+                        searchedTownData.map((town) => (
+                            <div key={town.uuid || `fallback-${town.name}`} className="player-search-item">
+                                <h3>{town.name}</h3>
+                                <p><strong>UUID:</strong> {town.uuid}</p>
+                                <p><strong>Mayor:</strong> {town.mayor.name}</p>
+                                <p><strong>Nation:</strong> {town.nation.name || 'N/A'}</p>
+                                <button onClick={() => setModalTown(town)} className="button player-search-details-button">
+                                    View Full Details
+                                </button>
+                            </div>
+                        ))
                     ) : (
-                        searchedTownData.length > 0 ? (
-                            searchedTownData.map(town => (
-                                <div key={town.uuid} className="player-search-item"> {/* Reusing player-search-item style */}
-                                    <h3>{town.name}</h3>
-                                    <p><strong>UUID:</strong> {town.uuid}</p>
-                                    <p><strong>Mayor:</strong> {town.mayor.name}</p>
-                                    <p><strong>Nation:</strong> {town.nation.name || 'N/A'}</p>
-                                    <button onClick={() => setModalTown(town)} className="button player-search-details-button">
-                                        View Full Details
-                                    </button>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No town found for "{searchQuery}".</p>
-                        )
+                        <p>No town found for "{searchQuery}".</p>
                     )}
                 </div>
             )}

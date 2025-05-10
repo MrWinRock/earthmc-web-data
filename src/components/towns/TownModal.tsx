@@ -1,6 +1,6 @@
 import React from 'react';
-import type { TownDetailed, TownResident } from '../../interfaces/town';
-import './../Components.css'; // Assuming general modal styles are here
+import type { TownDetailed, TownResident, TownQuarter, TownRank } from '../../interfaces/town';
+import './../Components.css';
 
 interface TownModalProps {
     town: TownDetailed | null;
@@ -20,13 +20,13 @@ const TownModal: React.FC<TownModalProps> = ({ town, isOpen, onClose }) => {
         return null;
     }
 
-    const renderResidentList = (title: string, residents: TownResident[]) => {
-        if (residents.length === 0) return null;
+    const renderResidentList = (title: string, residents: TownResident[] | undefined) => {
+        if (!residents || residents.length === 0) return null;
         return (
             <>
                 <h3>{title} ({residents.length}):</h3>
                 <ul>
-                    {residents.map(resident => (
+                    {residents.map((resident) => (
                         <li key={resident.uuid}>{resident.name} ({resident.uuid})</li>
                     ))}
                 </ul>
@@ -34,11 +34,16 @@ const TownModal: React.FC<TownModalProps> = ({ town, isOpen, onClose }) => {
         );
     };
 
+    const mapLink = `https://map.earthmc.net/?world=minecraft:overworld&zoom=5&x=${town.coordinates.spawn.x.toFixed(0)}&y=${town.coordinates.spawn.y.toFixed(0)}&z=${town.coordinates.spawn.z.toFixed(0)}`;
+
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
                 <button className="modal-close-button button" onClick={onClose}>X</button>
                 <h2>{town.name}</h2>
+                <a href={mapLink} target="_blank" rel="noopener noreferrer">
+                    View on Map
+                </a>
                 <p><strong>UUID:</strong> {town.uuid}</p>
                 {town.board && <p><strong>Board:</strong> {town.board}</p>}
                 <p><strong>Founder:</strong> {town.founder}</p>
@@ -70,6 +75,7 @@ const TownModal: React.FC<TownModalProps> = ({ town, isOpen, onClose }) => {
                 <h3>Stats</h3>
                 <p><strong>Town Blocks:</strong> {town.stats.numTownBlocks}</p>
                 <p><strong>Max Town Blocks:</strong> {town.stats.maxTownBlocks}</p>
+                <p><strong>Bonus Blocks:</strong> {town.stats.bonusBlocks}</p>
                 <p><strong>Residents:</strong> {town.stats.numResidents}</p>
                 <p><strong>Trusted:</strong> {town.stats.numTrusted}</p>
                 <p><strong>Outlaws:</strong> {town.stats.numOutlaws}</p>
@@ -80,30 +86,34 @@ const TownModal: React.FC<TownModalProps> = ({ town, isOpen, onClose }) => {
                 <p><strong>Spawn:</strong> World: {town.coordinates.spawn.world}, X: {town.coordinates.spawn.x.toFixed(2)}, Y: {town.coordinates.spawn.y.toFixed(2)}, Z: {town.coordinates.spawn.z.toFixed(2)}</p>
                 <p><strong>Home Block:</strong> X: {town.coordinates.homeBlock[0]}, Z: {town.coordinates.homeBlock[1]}</p>
                 <p><strong>Town Blocks Count:</strong> {town.coordinates.townBlocks.length}</p>
-                {/* Consider how to display townBlocks if needed, could be a long list */}
 
                 {renderResidentList("Residents", town.residents)}
                 {renderResidentList("Trusted", town.trusted)}
                 {renderResidentList("Outlaws", town.outlaws)}
 
-                {town.quarters.length > 0 && (
+                {town.quarters && town.quarters.length > 0 && (
                     <>
                         <h3>Quarters ({town.quarters.length}):</h3>
                         <ul>
-                            {town.quarters.map(quarterUuid => (
-                                <li key={quarterUuid}>{quarterUuid}</li>
+                            {town.quarters.map((quarter: TownQuarter) => (
+                                <li key={quarter.uuid}>{quarter.name} ({quarter.uuid})</li>
                             ))}
                         </ul>
                     </>
                 )}
 
-                {Object.keys(town.ranks).length > 0 && (
+                {town.ranks && Object.keys(town.ranks).length > 0 && (
                     <>
                         <h3>Ranks:</h3>
                         {Object.entries(town.ranks).map(([rankName, players]) => (
                             players.length > 0 && (
                                 <div key={rankName}>
-                                    <p><strong>{rankName}:</strong> {players.join(', ')}</p>
+                                    <p><strong>{rankName}:</strong></p>
+                                    <ul>
+                                        {players.map((player: TownRank) => (
+                                            <li key={player.uuid}>{player.name} ({player.uuid})</li>
+                                        ))}
+                                    </ul>
                                 </div>
                             )
                         ))}
@@ -111,7 +121,7 @@ const TownModal: React.FC<TownModalProps> = ({ town, isOpen, onClose }) => {
                 )}
 
                 <h3>Permissions:</h3>
-                <pre>{JSON.stringify(town.perms, null, 2)}</pre>
+                <pre>{JSON.stringify(town.perms || {}, null, 2)}</pre>
             </div>
         </div>
     );
