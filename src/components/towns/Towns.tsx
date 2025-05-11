@@ -3,9 +3,9 @@ import type { FormEvent } from 'react';
 import axios from 'axios';
 import type { TownBasic, TownDetailed } from '../../interfaces/town';
 import TownModal from './TownModal';
+import { EARTHMC_API_URL, PROXY_API_URL } from '../../config';
 import './../Components.css';
 
-const API_BASE_URL = import.meta.env.DEV ? '/api' : 'https://api.earthmc.net';
 const TOWNS_PER_PAGE = 10;
 
 const Towns = () => {
@@ -34,7 +34,7 @@ const Towns = () => {
             setLoadingAllTowns(true);
             setErrorAllTowns(null);
             try {
-                const response = await axios.get<TownBasic[]>(`${API_BASE_URL}/v3/aurora/towns`);
+                const response = await axios.get<TownBasic[]>(`${EARTHMC_API_URL}/towns`);
                 setAllTowns(response.data);
             } catch (err) {
                 setErrorAllTowns(err instanceof Error ? err : new Error(String(err ?? 'Failed to fetch towns')));
@@ -57,7 +57,7 @@ const Towns = () => {
         setSearchedTownData(null);
 
         try {
-            const response = await axios.post<TownDetailed[]>(`${API_BASE_URL}/v3/aurora/towns`, {
+            const response = await axios.post<TownDetailed[]>(`${PROXY_API_URL}/towns`, {
                 query: [searchQuery.trim()]
             });
 
@@ -82,7 +82,7 @@ const Towns = () => {
         setErrorModalTown(null);
         setModalTown(null);
         try {
-            const response = await axios.post<TownDetailed[]>(`${API_BASE_URL}/v3/aurora/towns`, {
+            const response = await axios.post<TownDetailed[]>(`${PROXY_API_URL}/towns`, {
                 query: [townIdentifier]
             });
             if (response.data && response.data.length > 0) {
