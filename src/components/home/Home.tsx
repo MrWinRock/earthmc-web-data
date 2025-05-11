@@ -57,7 +57,7 @@ const getMoonPhaseEmoji = (moonPhase: string): string => {
 };
 
 // Determine the API base URL based on the environment
-const API_BASE_URL = import.meta.env.DEV ? '/api' : 'https://api.earthmc.net';
+const EARTHMC_API_URL = 'https://api.earthmc.net/v3/aurora';
 
 const Home = () => {
     const [data, setData] = useState<ApiData | null>(null);
@@ -72,7 +72,7 @@ const Home = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await axios.get<ApiData>(`${API_BASE_URL}/v3/aurora`);
+                const response = await axios.get<ApiData>(`${EARTHMC_API_URL}`);
                 setData(response.data);
             } catch (err: unknown) {
                 if (err instanceof Error) {
