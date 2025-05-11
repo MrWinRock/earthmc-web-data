@@ -3,10 +3,8 @@ import type { FormEvent } from 'react';
 import './../Components.css'
 import axios from 'axios';
 import type { PlayerDetailed, PlayerBasic } from '../../interfaces/player';
+import { EARTHMC_API_URL, PROXY_API_URL } from '../../config';
 import PlayerModal from './PlayerModal';
-
-const EARTHMC_API_URL = 'https://api.earthmc.net/v3/aurora';
-const PROXY_API_URL = 'https://earthmc-api-proxy.onrender.com/api';
 
 const Players = () => {
     const [searchQuery, setSearchQuery] = useState('');

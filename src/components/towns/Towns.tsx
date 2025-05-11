@@ -3,10 +3,8 @@ import type { FormEvent } from 'react';
 import axios from 'axios';
 import type { TownBasic, TownDetailed } from '../../interfaces/town';
 import TownModal from './TownModal';
+import { EARTHMC_API_URL, PROXY_API_URL } from '../../config';
 import './../Components.css';
-
-const EARTHMC_API_URL = 'https://api.earthmc.net/v3/aurora';
-const PROXY_API_URL = 'https://earthmc-api-proxy.onrender.com/api';
 
 const TOWNS_PER_PAGE = 10;
 

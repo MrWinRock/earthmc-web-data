@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { EARTHMC_API_URL } from '../../config';
 import './../Components.css'
 import axios from 'axios';
 
@@ -55,9 +56,6 @@ const getMoonPhaseEmoji = (moonPhase: string): string => {
             return '';
     }
 };
-
-// Determine the API base URL based on the environment
-const EARTHMC_API_URL = 'https://api.earthmc.net/v3/aurora';
 
 const Home = () => {
     const [data, setData] = useState<ApiData | null>(null);
