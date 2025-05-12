@@ -115,9 +115,12 @@ const Home = () => {
                             <p><strong>Storming:</strong> {data.status.hasStorm ? 'Yes' : 'No'}</p>
                             <p><strong>Thundering:</strong> {data.status.isThundering ? 'Yes' : 'No'}</p>
 
+                            <h3>Vote Party:</h3>
+                            <p><strong>Remaining Votes:</strong> {data.voteParty.numRemaining} / {data.voteParty.target}</p>
+
                             <h3>Timestamps:</h3>
-                            <p>New Day Time: {new Date(data.timestamps.newDayTime).toLocaleString()}</p>
-                            <p>Server Time of Day: {data.timestamps.serverTimeOfDay}</p>
+                            <p><strong>New Day Time:</strong> {data.timestamps.newDayTime}</p>
+                            <p><strong>Server Time of Day:</strong> {data.timestamps.serverTimeOfDay}</p>
 
                             <h3>Statistics:</h3>
                             <p>Online Players: {data.stats.numOnlinePlayers} / {data.stats.maxPlayers}</p>
@@ -131,10 +134,6 @@ const Home = () => {
                             <p>Cuboids: {data.stats.numCuboids}</p>
                             <p>Current In-game Time: {data.stats.time}</p>
                             <p>Full In-game Time: {data.stats.fullTime}</p>
-
-                            <h3>Vote Party:</h3>
-                            <p>Target: {data.voteParty.target}</p>
-                            <p>Remaining Votes: {data.voteParty.numRemaining}</p>
                         </>
                     )}
                 </div>

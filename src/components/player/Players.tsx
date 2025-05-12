@@ -6,6 +6,8 @@ import type { PlayerDetailed, PlayerBasic } from '../../interfaces/player';
 import { EARTHMC_API_URL, PROXY_API_URL } from '../../config';
 import PlayerModal from './PlayerModal';
 
+const PLAYERS_PER_PAGE = 10;
+
 const Players = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchedPlayerData, setSearchedPlayerData] = useState<PlayerDetailed[] | null>(null);
@@ -18,9 +20,7 @@ const Players = () => {
     const [errorAllPlayers, setErrorAllPlayers] = useState<Error | null>(null);
 
     const [currentPage, setCurrentPage] = useState(1);
-    const playersPerPage = 10;
 
-    // State for the modal
     const [modalPlayer, setModalPlayer] = useState<PlayerDetailed | null>(null);
     const [loadingModalPlayer, setLoadingModalPlayer] = useState(false);
     const [errorModalPlayer, setErrorModalPlayer] = useState<Error | null>(null);
@@ -115,10 +115,10 @@ const Players = () => {
     };
 
     // Pagination logic for allPlayers list
-    const indexOfLastPlayer = currentPage * playersPerPage;
-    const indexOfFirstPlayer = indexOfLastPlayer - playersPerPage;
+    const indexOfLastPlayer = currentPage * PLAYERS_PER_PAGE;
+    const indexOfFirstPlayer = indexOfLastPlayer - PLAYERS_PER_PAGE;
     const currentDisplayedPlayers = allPlayers.slice(indexOfFirstPlayer, indexOfLastPlayer);
-    const totalPages = Math.ceil(allPlayers.length / playersPerPage);
+    const totalPages = Math.ceil(allPlayers.length / PLAYERS_PER_PAGE);
 
     const nextPage = () => {
         setCurrentPage(prev => Math.min(prev + 1, totalPages));
@@ -131,13 +131,13 @@ const Players = () => {
     return (
         <div className="data-container">
             <h1>Players</h1>
-            <form onSubmit={handleSearch} className="player-search-form">
+            <form onSubmit={handleSearch} className="search-form">
                 <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Enter player name or UUID to search"
-                    className="player-search-input"
+                    className="search-input"
                 />
                 <button type="submit" className="button" disabled={loadingSearch}>
                     {loadingSearch ? 'Searching...' : 'Search Player'}
@@ -168,12 +168,12 @@ const Players = () => {
                     ) : (
                         searchedPlayerData.length > 0 ? (
                             searchedPlayerData.map(player => (
-                                <div key={player.uuid} className="player-search-item">
+                                <div key={player.uuid} className="search-item">
                                     <h3>{player.formattedName} ({player.name})</h3>
                                     <p><strong>UUID:</strong> {player.uuid}</p>
                                     <p><strong>Town:</strong> {player.town.name || 'N/A'}</p>
                                     <p><strong>Nation:</strong> {player.nation.name || 'N/A'}</p>
-                                    <button onClick={() => setModalPlayer(player)} className="button player-search-details-button">
+                                    <button onClick={() => setModalPlayer(player)} className="button search-details-button">
                                         View Full Details
                                     </button>
                                 </div>
@@ -185,9 +185,8 @@ const Players = () => {
                 </div>
             )}
 
-            {/* Display All Players List (if no search result is being shown) */}
             {!searchedPlayerData && (
-                <div className="all-players-list-container">
+                <div className="all-list-container">
                     <h2>All Registered Players ({allPlayers.length})</h2>
                     {loadingAllPlayers && <p>Loading all players...</p>}
                     {errorAllPlayers && !loadingAllPlayers && <p>Error loading players list: {errorAllPlayers.message}</p>}
@@ -196,7 +195,7 @@ const Players = () => {
                         <>
                             <div className="data-display">
                                 {currentDisplayedPlayers.map(player => (
-                                    <div key={player.uuid} className="all-players-item">
+                                    <div key={player.uuid} className="all-item">
                                         <div>
                                             <p><strong>Name:</strong> {player.name}</p>
                                             <p><strong>UUID:</strong> {player.uuid}</p>
@@ -230,7 +229,6 @@ const Players = () => {
                 </div>
             )}
 
-            {/* Modal Rendering */}
             {loadingModalPlayer && <p className="modal-status-text">Loading player details...</p>}
             {errorModalPlayer && <p className="modal-error-text">Error loading details: {errorModalPlayer.message}</p>}
             <PlayerModal

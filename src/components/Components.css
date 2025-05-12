@@ -160,14 +160,14 @@
     background-color: #cc0000;
 }
 
-.player-search-form {
+.search-form {
     display: flex;
     justify-content: center;
     margin-bottom: 2rem;
     gap: 1rem;
 }
 
-.player-search-input {
+.search-input {
     padding: 0.5rem;
     font-size: 1rem;
     min-width: 300px;
@@ -186,21 +186,21 @@
     margin: 1rem 0;
 }
 
-.player-search-item {
+.search-item {
     margin-bottom: 1rem;
     border-bottom: 1px solid #444;
     padding-bottom: 1rem;
 }
 
-.player-search-details-button {
+.search-details-button {
     margin-top: 0.5rem;
 }
 
-.all-players-list-container {
+.all-list-container {
     margin-top: 2rem;
 }
 
-.all-players-item {
+.all-item {
     padding: 0.5rem 0;
     border-bottom: 1px solid #3a3a3a;
     display: flex;
