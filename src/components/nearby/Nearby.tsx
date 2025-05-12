@@ -1,7 +1,7 @@
 const Nearby = () => {
     return (
-        <div className="nearby">
-            <h1>Welcome to the Nearby Page</h1>
+        <div className="data-container">
+            <h1>Under Construction...</h1>
         </div>
     );
 }

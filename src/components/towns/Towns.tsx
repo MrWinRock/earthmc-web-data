@@ -113,13 +113,13 @@ const Towns = () => {
     return (
         <div className="data-container">
             <h1>Towns</h1>
-            <form onSubmit={handleSearch} className="player-search-form"> {/* Reusing player-search-form style */}
+            <form onSubmit={handleSearch} className="search-form">
                 <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Enter town name or UUID"
-                    className="player-search-input" // Reusing player-search-input style
+                    className="search-input"
                 />
                 <button type="submit" className="button" disabled={loadingSearch}>
                     {loadingSearch ? 'Searching...' : 'Search Town'}
@@ -143,12 +143,12 @@ const Towns = () => {
 
                     {Array.isArray(searchedTownData) && searchedTownData.length > 0 ? (
                         searchedTownData.map((town) => (
-                            <div key={town.uuid || `fallback-${town.name}`} className="player-search-item">
+                            <div key={town.uuid || `fallback-${town.name}`} className="search-item">
                                 <h3>{town.name}</h3>
                                 <p><strong>UUID:</strong> {town.uuid}</p>
                                 <p><strong>Mayor:</strong> {town.mayor.name}</p>
                                 <p><strong>Nation:</strong> {town.nation.name || 'N/A'}</p>
-                                <button onClick={() => setModalTown(town)} className="button player-search-details-button">
+                                <button onClick={() => setModalTown(town)} className="button search-details-button">
                                     View Full Details
                                 </button>
                             </div>
@@ -160,7 +160,7 @@ const Towns = () => {
             )}
 
             {!searchedTownData && !errorSearch && (
-                <div className="all-players-list-container"> {/* Reusing all-players-list-container style */}
+                <div className="all-list-container">
                     <h2>All Registered Towns ({allTowns.length})</h2>
                     {loadingAllTowns && <p>Loading all towns...</p>}
                     {errorAllTowns && !loadingAllTowns && <p>Error: {errorAllTowns.message}</p>}
@@ -169,7 +169,7 @@ const Towns = () => {
                         <>
                             <div className="data-display">
                                 {currentDisplayedTowns.map(town => (
-                                    <div key={town.uuid} className="all-players-item"> {/* Reusing all-players-item style */}
+                                    <div key={town.uuid} className="all-item">
                                         <div>
                                             <p><strong>Name:</strong> {town.name}</p>
                                             <p><strong>UUID:</strong> {town.uuid}</p>
