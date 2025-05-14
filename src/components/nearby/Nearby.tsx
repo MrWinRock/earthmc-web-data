@@ -17,7 +17,8 @@ interface NearbyResult {
 
 const Nearby = () => {
     const [targetType, setTargetType] = useState<'TOWN' | 'COORDINATE'>('TOWN');
-    const [target, setTarget] = useState<string | [number, number]>(''); // Unified target state
+    const [townName, setTownName] = useState<string>('');
+    const [coordinates, setCoordinates] = useState<[number, number]>([0, 0]);
     const [radius, setRadius] = useState<number>(100);
     const [results, setResults] = useState<NearbyResult[][] | null>(null);
     const [loading, setLoading] = useState(false);
@@ -30,7 +31,7 @@ const Nearby = () => {
 
         const query: NearbyQuery = {
             target_type: targetType,
-            target,
+            target: targetType === 'TOWN' ? townName : coordinates,
             search_type: 'TOWN',
             radius,
         };
@@ -52,10 +53,10 @@ const Nearby = () => {
     };
 
     const getResultsHeader = () => {
-        if (targetType === 'TOWN' && typeof target === 'string' && target.trim()) {
-            return `Nearby of ${target}`;
-        } else if (targetType === 'COORDINATE' && Array.isArray(target)) {
-            return `Nearby of (${target[0]}, ${target[1]})`;
+        if (targetType === 'TOWN' && townName.trim()) {
+            return `Nearby of ${townName}`;
+        } else if (targetType === 'COORDINATE') {
+            return `Nearby of (${coordinates[0]}, ${coordinates[1]})`;
         }
         return 'Nearby Results';
     };
@@ -70,7 +71,8 @@ const Nearby = () => {
                         value={targetType}
                         onChange={(e) => {
                             setTargetType(e.target.value as 'TOWN' | 'COORDINATE');
-                            setTarget(e.target.value === 'TOWN' ? '' : [0, 0]); // Reset target based on type
+                            setTownName('');
+                            setCoordinates([0, 0]);
                         }}
                         className="form-input"
                     >
@@ -83,8 +85,8 @@ const Nearby = () => {
                         Target Town:
                         <input
                             type="text"
-                            value={target as string}
-                            onChange={(e) => setTarget(e.target.value)}
+                            value={townName}
+                            onChange={(e) => setTownName(e.target.value)}
                             placeholder="Enter town name"
                             className="form-input"
                         />
@@ -95,9 +97,9 @@ const Nearby = () => {
                             X Coordinate:
                             <input
                                 type="number"
-                                value={(target as [number, number])[0]}
+                                value={coordinates[0]}
                                 onChange={(e) =>
-                                    setTarget([Number(e.target.value), (target as [number, number])[1]])
+                                    setCoordinates([Number(e.target.value), coordinates[1]])
                                 }
                                 placeholder="Enter X"
                                 className="form-input"
@@ -107,9 +109,9 @@ const Nearby = () => {
                             Z Coordinate:
                             <input
                                 type="number"
-                                value={(target as [number, number])[1]}
+                                value={coordinates[1]}
                                 onChange={(e) =>
-                                    setTarget([(target as [number, number])[0], Number(e.target.value)])
+                                    setCoordinates([coordinates[0], Number(e.target.value)])
                                 }
                                 placeholder="Enter Z"
                                 className="form-input"
@@ -137,8 +139,8 @@ const Nearby = () => {
                 <div className="data-display">
                     <h2>{getResultsHeader()}</h2>
                     {results.length > 0 ? (
-                        results.map((group) => (
-                            <div key={group.map(item => item.uuid).join('-')} className="result-group">
+                        results.map((group, index) => (
+                            <div key={index} className="result-group">
                                 <ul>
                                     {group.map((item) => (
                                         <li key={item.uuid}>
