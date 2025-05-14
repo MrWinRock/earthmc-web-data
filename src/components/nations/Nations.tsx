@@ -115,14 +115,17 @@ const Nations = () => {
     return (
         <div className="data-container">
             <h1>Nations</h1>
-            <form onSubmit={handleSearch} className="search-form">
-                <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Enter nation name or UUID"
-                    className="search-input"
-                />
+            <form onSubmit={handleSearch} className="form-container">
+                <label className="form-label">
+                    Search Nation:
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Enter nation name or UUID"
+                        className="form-input"
+                    />
+                </label>
                 <button type="submit" className="button" disabled={loadingSearch}>
                     {loadingSearch ? 'Searching...' : 'Search Nation'}
                 </button>
