@@ -131,14 +131,17 @@ const Players = () => {
     return (
         <div className="data-container">
             <h1>Players</h1>
-            <form onSubmit={handleSearch} className="search-form">
-                <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Enter player name or UUID to search"
-                    className="search-input"
-                />
+            <form onSubmit={handleSearch} className="form-container">
+                <label className="form-label">
+                    Search Player:
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Enter player name or UUID"
+                        className="form-input"
+                    />
+                </label>
                 <button type="submit" className="button" disabled={loadingSearch}>
                     {loadingSearch ? 'Searching...' : 'Search Player'}
                 </button>
