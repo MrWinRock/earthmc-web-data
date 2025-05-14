@@ -63,7 +63,7 @@ const Nearby = () => {
     return (
         <div className="data-container">
             <h1>Nearby</h1>
-            <div className="form-container">
+            <form className="form-container" onSubmit={(e) => e.preventDefault()}>
                 <label className="form-label">
                     Target Type:
                     <select
@@ -130,15 +130,15 @@ const Nearby = () => {
                 <button onClick={handleSearch} className="button" disabled={loading}>
                     {loading ? 'Searching...' : 'Search Nearby'}
                 </button>
-            </div>
+            </form>
             {loading && <p>Loading nearby data...</p>}
             {error && <p className="error-text">{error}</p>}
             {results && (
                 <div className="data-display">
                     <h2>{getResultsHeader()}</h2>
                     {results.length > 0 ? (
-                        results.map((group, index) => (
-                            <div key={index} className="result-group">
+                        results.map((group) => (
+                            <div key={group.map(item => item.uuid).join('-')} className="result-group">
                                 <ul>
                                     {group.map((item) => (
                                         <li key={item.uuid}>
