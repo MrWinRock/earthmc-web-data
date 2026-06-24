@@ -95,12 +95,12 @@ export interface TownDetailed extends TownBasic {
   nation: TownNation;
   timestamps: TownTimestamps;
   status: TownStatus;
-  stats: TownStats & { bonusBlocks: number };
+  stats: TownStats;
   perms: TownPerms;
   coordinates: TownCoordinates;
   residents: TownResident[];
   trusted: TownResident[];
   outlaws: TownResident[];
-  quarters: TownQuarter[];
-  ranks: Record<string, TownRank[]>;
+  quarters: string[];
+  ranks: Record<string, string[]>;
 }

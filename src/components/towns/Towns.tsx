@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import axios from 'axios';
 import type { TownBasic, TownDetailed } from '../../interfaces/town';
 import TownModal from './TownModal';
-import { EARTHMC_API_URL, PROXY_API_URL } from '../../config';
+import { EARTHMC_API_URL } from '../../config';
 import './../Components.css';
 
 const TOWNS_PER_PAGE = 10;
@@ -57,8 +57,10 @@ const Towns = () => {
         setSearchedTownData(null);
 
         try {
-            const response = await axios.post<TownDetailed[]>(`${PROXY_API_URL}/towns`, {
+            const response = await axios.post<TownDetailed[]>(`${EARTHMC_API_URL}/towns`, JSON.stringify({
                 query: [searchQuery.trim()]
+            }), {
+                headers: { 'Content-Type': 'text/plain' }
             });
 
             if (response.data) {
@@ -82,8 +84,10 @@ const Towns = () => {
         setErrorModalTown(null);
         setModalTown(null);
         try {
-            const response = await axios.post<TownDetailed[]>(`${PROXY_API_URL}/towns`, {
+            const response = await axios.post<TownDetailed[]>(`${EARTHMC_API_URL}/towns`, JSON.stringify({
                 query: [townIdentifier]
+            }), {
+                headers: { 'Content-Type': 'text/plain' }
             });
             if (response.data && response.data.length > 0) {
                 setModalTown(response.data[0]);

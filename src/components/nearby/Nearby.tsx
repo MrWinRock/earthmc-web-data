@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 import './../Components.css';
-import { PROXY_API_URL } from '../../config';
+import { EARTHMC_API_URL } from '../../config';
 
 interface NearbyQuery {
     target_type: 'TOWN' | 'COORDINATE';
@@ -37,8 +37,10 @@ const Nearby = () => {
         };
 
         try {
-            const response = await axios.post<NearbyResult[][]>(`${PROXY_API_URL}/nearby`, {
-                query: [query],
+            const response = await axios.post<NearbyResult[][]>(`${EARTHMC_API_URL}/nearby`, JSON.stringify({
+                query: [query]
+            }), {
+                headers: { 'Content-Type': 'text/plain' }
             });
             setResults(response.data);
         } catch (err: unknown) {

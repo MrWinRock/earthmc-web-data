@@ -109,7 +109,7 @@ const Home = () => {
                         </>
                     ) : (
                         <>
-                            <h2>Server Status (Aurora)</h2>
+                            <h2>Server Status</h2>
                             <p><strong>Version:</strong> {data.version}</p>
                             <p><strong>Moon Phase:</strong> {data.moonPhase} {getMoonPhaseEmoji(data.moonPhase)} </p>
                             <p><strong>Storming:</strong> {data.status.hasStorm ? 'Yes' : 'No'}</p>

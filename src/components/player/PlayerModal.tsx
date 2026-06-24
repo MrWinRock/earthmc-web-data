@@ -27,6 +27,7 @@ const PlayerModal: React.FC<PlayerModalProps> = ({ player, isOpen, onClose }) =>
                 {player.title && <p><strong>Title:</strong> {player.title}</p>}
                 {player.surname && <p><strong>Surname:</strong> {player.surname}</p>}
                 {player.about && <p><strong>About:</strong> {player.about}</p>}
+                {player.discord && <p><strong>Discord ID:</strong> {player.discord}</p>}
 
                 <h3>Town & Nation</h3>
                 <p><strong>Town:</strong> {player.town.name || 'N/A'} {player.town.uuid && `(${player.town.uuid})`}</p>

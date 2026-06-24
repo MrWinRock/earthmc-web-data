@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import './../Components.css'
 import axios from 'axios';
 import type { PlayerDetailed, PlayerBasic } from '../../interfaces/player';
-import { EARTHMC_API_URL, PROXY_API_URL } from '../../config';
+import { EARTHMC_API_URL } from '../../config';
 import PlayerModal from './PlayerModal';
 
 const PLAYERS_PER_PAGE = 10;
@@ -62,8 +62,10 @@ const Players = () => {
         setSearchedPlayerData(null);
 
         try {
-            const response = await axios.post<PlayerDetailed[]>(`${PROXY_API_URL}/players`, {
+            const response = await axios.post<PlayerDetailed[]>(`${EARTHMC_API_URL}/players`, JSON.stringify({
                 query: [searchQuery.trim()]
+            }), {
+                headers: { 'Content-Type': 'text/plain' }
             });
             if (response.data && response.data.length > 0) {
                 setSearchedPlayerData(response.data);
@@ -90,8 +92,10 @@ const Players = () => {
         setErrorModalPlayer(null);
         setModalPlayer(null);
         try {
-            const response = await axios.post<PlayerDetailed[]>(`${PROXY_API_URL}/players`, {
+            const response = await axios.post<PlayerDetailed[]>(`${EARTHMC_API_URL}/players`, JSON.stringify({
                 query: [playerIdentifier]
+            }), {
+                headers: { 'Content-Type': 'text/plain' }
             });
             if (response.data && response.data.length > 0) {
                 setModalPlayer(response.data[0]);

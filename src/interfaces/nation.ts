@@ -64,10 +64,8 @@ export interface NationDetailed {
   name: string;
   uuid: string;
   board: string | null;
-  dynmap: {
-    colour: string;
-    outline: string;
-  };
+  dynmapColour: string;
+  dynmapOutline: string;
   wiki: string | null;
   king: NationKing;
   capital: NationCapital;
@@ -80,7 +78,5 @@ export interface NationDetailed {
   allies: NationAlly[];
   enemies: NationEnemy[];
   sanctioned: NationTown[];
-  ranks: Record<string, NationResident[]>;
-  colonist: NationResident[];
-  diplomat: NationResident[];
+  ranks: Record<string, string[]>;
 }

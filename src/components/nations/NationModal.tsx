@@ -1,5 +1,5 @@
 import React from 'react';
-import type { NationDetailed, NationResident } from '../../interfaces/nation';
+import type { NationDetailed } from '../../interfaces/nation';
 import './../Components.css';
 
 interface NationModalProps {
@@ -85,8 +85,8 @@ const NationModal: React.FC<NationModalProps> = ({ nation, isOpen, onClose }) =>
                                 <div key={rankName}>
                                     <p><strong>{rankName}:</strong></p>
                                     <ul>
-                                        {players.map((player: NationResident) => (
-                                            <li key={player.uuid}>{player.name} ({player.uuid})</li>
+                                        {players.map((playerName: string) => (
+                                            <li key={playerName}>{playerName}</li>
                                         ))}
                                     </ul>
                                 </div>

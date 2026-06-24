@@ -71,4 +71,5 @@ export interface PlayerDetailed extends PlayerBasic {
   perms: PlayerPerms;
   ranks: PlayerRanks;
   friends: PlayerFriend[];
+  discord: string | null;
 }

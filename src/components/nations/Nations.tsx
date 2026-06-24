@@ -3,7 +3,7 @@ import type { FormEvent } from 'react';
 import axios from 'axios';
 import type { NationDetailed } from '../../interfaces/nation';
 import NationModal from './NationModal';
-import { EARTHMC_API_URL, PROXY_API_URL } from '../../config';
+import { EARTHMC_API_URL } from '../../config';
 import './../Components.css';
 
 const NATIONS_PER_PAGE = 10;
@@ -57,8 +57,10 @@ const Nations = () => {
         setSearchedNationData(null);
 
         try {
-            const response = await axios.post<NationDetailed[]>(`${PROXY_API_URL}/nations`, {
-                query: [searchQuery.trim()],
+            const response = await axios.post<NationDetailed[]>(`${EARTHMC_API_URL}/nations`, JSON.stringify({
+                query: [searchQuery.trim()]
+            }), {
+                headers: { 'Content-Type': 'text/plain' }
             });
 
             if (response.data) {
@@ -82,8 +84,10 @@ const Nations = () => {
         setErrorModalNation(null);
         setModalNation(null);
         try {
-            const response = await axios.post<NationDetailed[]>(`${PROXY_API_URL}/nations`, {
-                query: [nationIdentifier],
+            const response = await axios.post<NationDetailed[]>(`${EARTHMC_API_URL}/nations`, JSON.stringify({
+                query: [nationIdentifier]
+            }), {
+                headers: { 'Content-Type': 'text/plain' }
             });
             if (response.data && response.data.length > 0) {
                 setModalNation(response.data[0]);

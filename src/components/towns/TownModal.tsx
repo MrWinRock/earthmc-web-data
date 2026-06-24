@@ -1,5 +1,5 @@
 import React from 'react';
-import type { TownDetailed, TownResident, TownQuarter, TownRank } from '../../interfaces/town';
+import type { TownDetailed, TownResident } from '../../interfaces/town';
 import './../Components.css';
 
 interface TownModalProps {
@@ -75,7 +75,6 @@ const TownModal: React.FC<TownModalProps> = ({ town, isOpen, onClose }) => {
                 <h3>Stats</h3>
                 <p><strong>Town Blocks:</strong> {town.stats.numTownBlocks}</p>
                 <p><strong>Max Town Blocks:</strong> {town.stats.maxTownBlocks}</p>
-                <p><strong>Bonus Blocks:</strong> {town.stats.bonusBlocks}</p>
                 <p><strong>Residents:</strong> {town.stats.numResidents}</p>
                 <p><strong>Trusted:</strong> {town.stats.numTrusted}</p>
                 <p><strong>Outlaws:</strong> {town.stats.numOutlaws}</p>
@@ -95,8 +94,8 @@ const TownModal: React.FC<TownModalProps> = ({ town, isOpen, onClose }) => {
                     <>
                         <h3>Quarters ({town.quarters.length}):</h3>
                         <ul>
-                            {town.quarters.map((quarter: TownQuarter) => (
-                                <li key={quarter.uuid}>{quarter.name} ({quarter.uuid})</li>
+                            {town.quarters.map((quarterUuid: string) => (
+                                <li key={quarterUuid}>{quarterUuid}</li>
                             ))}
                         </ul>
                     </>
@@ -110,8 +109,8 @@ const TownModal: React.FC<TownModalProps> = ({ town, isOpen, onClose }) => {
                                 <div key={rankName}>
                                     <p><strong>{rankName}:</strong></p>
                                     <ul>
-                                        {players.map((player: TownRank) => (
-                                            <li key={player.uuid}>{player.name} ({player.uuid})</li>
+                                        {players.map((playerName: string) => (
+                                            <li key={playerName}>{playerName}</li>
                                         ))}
                                     </ul>
                                 </div>
