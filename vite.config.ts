@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react-swc";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: "/earthmc-web-data/",
+  base: "/",
   server: {
     // Add this server configuration
     proxy: {

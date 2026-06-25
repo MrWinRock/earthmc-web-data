@@ -15,7 +15,7 @@
       // https://www.foo.tld/?p=/one/two&q=a=b~and~c=d#qwe
       // Note: this 404.html file must be at least 512 bytes for Internet Explorer to display it.
       var l = window.location;
-      var segmentCount = 1; // IMPORTANT: Set to 1 for <username>.github.io/<reponame>/
+      var segmentCount = 0; // Set to 0 for custom domains / root domain
 
       l.replace(
         l.protocol +
