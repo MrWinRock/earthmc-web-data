@@ -23,5 +23,12 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment variables
 .env
 .env.*
+
+# AI
+Plans/
+*.exe
+*.exe.*
+${HOME}/

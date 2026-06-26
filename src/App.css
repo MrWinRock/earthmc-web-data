@@ -1,0 +1,15 @@
+.app-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  mask-image: radial-gradient(
+    ellipse at 50% 0%,
+    rgba(0, 0, 0, 0.5),
+    transparent 70%
+  );
+}
+
+.app-main {
+  min-height: calc(100vh - var(--nav-h));
+}

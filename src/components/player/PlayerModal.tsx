@@ -1,78 +1,142 @@
-import React from 'react';
-import type { PlayerDetailed } from '../../interfaces/player';
-import './../Components.css';
+import type { PlayerDetailed } from "../../interfaces/player";
+import { Badge, BoolBadge, DataRow, Modal, PlayerHead, Section } from "../ui";
+import { PermsView } from "../common/PermsView";
+import { formatDate, formatGold, formatRelative } from "../../utils/format";
 
 interface PlayerModalProps {
-    player: PlayerDetailed | null;
-    isOpen: boolean;
-    onClose: () => void;
+  player: PlayerDetailed | null;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const formatDate = (timestamp: number | null) => {
-    if (timestamp === null) return 'N/A';
-    return new Date(timestamp).toLocaleString();
-};
+const PlayerModal = ({ player, isOpen, onClose }: PlayerModalProps) => {
+  if (!isOpen || !player) return null;
 
-const PlayerModal: React.FC<PlayerModalProps> = ({ player, isOpen, onClose }) => {
-    if (!isOpen || !player) {
-        return null;
-    }
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        <span style={{ display: "flex", alignItems: "center", gap: "0.7rem" }}>
+          <PlayerHead id={player.uuid} size={40} alt={player.name} />
+          <span>
+            {player.name}
+            {player.formattedName && player.formattedName !== player.name && (
+              <span
+                style={{
+                  display: "block",
+                  fontSize: "0.8rem",
+                  color: "var(--text-muted)",
+                  fontWeight: 400,
+                }}
+              >
+                {player.formattedName}
+              </span>
+            )}
+          </span>
+        </span>
+      }
+      headerExtra={
+        <Badge tone={player.status.isOnline ? "green" : "muted"} dot>
+          {player.status.isOnline ? "Online" : "Offline"}
+        </Badge>
+      }
+    >
+      <div className="chip-row" style={{ marginBottom: "0.5rem" }}>
+        {player.status.isMayor && <Badge tone="amber">Mayor</Badge>}
+        {player.status.isKing && <Badge tone="amber">King</Badge>}
+        {player.status.isNPC && <Badge>NPC</Badge>}
+        {player.title && <Badge tone="info">{player.title}</Badge>}
+      </div>
 
-    return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close-button button" onClick={onClose}>X</button>
-                <h2>{player.formattedName} ({player.name})</h2>
-                <p><strong>UUID:</strong> {player.uuid}</p>
-                {player.title && <p><strong>Title:</strong> {player.title}</p>}
-                {player.surname && <p><strong>Surname:</strong> {player.surname}</p>}
-                {player.about && <p><strong>About:</strong> {player.about}</p>}
-                {player.discord && <p><strong>Discord ID:</strong> {player.discord}</p>}
+      <div className="datalist">
+        <DataRow label="UUID" mono>
+          {player.uuid}
+        </DataRow>
+        {player.surname && <DataRow label="Surname">{player.surname}</DataRow>}
+        {player.about && <DataRow label="About">{player.about}</DataRow>}
+        {player.discord && (
+          <DataRow label="Discord" mono>
+            {player.discord}
+          </DataRow>
+        )}
+      </div>
 
-                <h3>Town & Nation</h3>
-                <p><strong>Town:</strong> {player.town.name || 'N/A'} {player.town.uuid && `(${player.town.uuid})`}</p>
-                <p><strong>Nation:</strong> {player.nation.name || 'N/A'} {player.nation.uuid && `(${player.nation.uuid})`}</p>
-
-                <h3>Timestamps</h3>
-                <p><strong>Registered:</strong> {formatDate(player.timestamps.registered)}</p>
-                <p><strong>Joined Town:</strong> {formatDate(player.timestamps.joinedTownAt)}</p>
-                <p><strong>Last Online:</strong> {formatDate(player.timestamps.lastOnline)}</p>
-
-                <h3>Status</h3>
-                <p><strong>Online:</strong> {player.status.isOnline ? 'Yes' : 'No'}</p>
-                <p><strong>NPC:</strong> {player.status.isNPC ? 'Yes' : 'No'}</p>
-                <p><strong>Mayor:</strong> {player.status.isMayor ? 'Yes' : 'No'}</p>
-                <p><strong>King:</strong> {player.status.isKing ? 'Yes' : 'No'}</p>
-                <p><strong>Has Town:</strong> {player.status.hasTown ? 'Yes' : 'No'}</p>
-                <p><strong>Has Nation:</strong> {player.status.hasNation ? 'Yes' : 'No'}</p>
-
-                <h3>Stats</h3>
-                <p><strong>Balance:</strong> {player.stats.balance} gold</p>
-                <p><strong>Friends Count:</strong> {player.stats.numFriends}</p>
-
-                {player.ranks.townRanks.length > 0 && (
-                    <p><strong>Town Ranks:</strong> {player.ranks.townRanks.join(', ')}</p>
-                )}
-                {player.ranks.nationRanks.length > 0 && (
-                    <p><strong>Nation Ranks:</strong> {player.ranks.nationRanks.join(', ')}</p>
-                )}
-
-                {player.friends.length > 0 && (
-                    <>
-                        <h3>Friends ({player.friends.length}):</h3>
-                        <ul>
-                            {player.friends.map(friend => (
-                                <li key={friend.uuid}>{friend.name} ({friend.uuid})</li>
-                            ))}
-                        </ul>
-                    </>
-                )}
-
-                <h3>Permissions:</h3>
-                <pre>{JSON.stringify(player.perms, null, 2)}</pre>
-            </div>
+      <Section title="Affiliation">
+        <div className="datalist">
+          <DataRow label="Town">{player.town.name || "—"}</DataRow>
+          <DataRow label="Nation">{player.nation.name || "—"}</DataRow>
+          {player.ranks.townRanks.length > 0 && (
+            <DataRow label="Town ranks">
+              {player.ranks.townRanks.join(", ")}
+            </DataRow>
+          )}
+          {player.ranks.nationRanks.length > 0 && (
+            <DataRow label="Nation ranks">
+              {player.ranks.nationRanks.join(", ")}
+            </DataRow>
+          )}
         </div>
-    );
+      </Section>
+
+      <Section title="Stats">
+        <div className="datalist">
+          <DataRow label="Balance">{formatGold(player.stats.balance)}</DataRow>
+          <DataRow label="Friends">{player.stats.numFriends}</DataRow>
+        </div>
+      </Section>
+
+      <Section title="Timestamps">
+        <div className="datalist">
+          <DataRow label="Registered">
+            {formatDate(player.timestamps.registered)}
+          </DataRow>
+          <DataRow label="Joined town">
+            {formatDate(player.timestamps.joinedTownAt)}
+          </DataRow>
+          <DataRow label="Last online">
+            {player.timestamps.lastOnline
+              ? `${formatDate(player.timestamps.lastOnline)} (${formatRelative(
+                  player.timestamps.lastOnline
+                )})`
+              : "N/A"}
+          </DataRow>
+        </div>
+      </Section>
+
+      <Section title="Status flags">
+        <div className="datalist">
+          <DataRow label="Has town">
+            <BoolBadge value={player.status.hasTown} />
+          </DataRow>
+          <DataRow label="Has nation">
+            <BoolBadge value={player.status.hasNation} />
+          </DataRow>
+        </div>
+      </Section>
+
+      {player.friends.length > 0 && (
+        <Section title={`Friends (${player.friends.length})`}>
+          <div className="chip-row">
+            {player.friends.map((f) => (
+              <span key={f.uuid} className="badge">
+                {f.name}
+              </span>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      <Section title="Permissions">
+        <PermsView perms={player.perms} />
+      </Section>
+
+      <details>
+        <summary>Developer · raw JSON</summary>
+        <pre>{JSON.stringify(player, null, 2)}</pre>
+      </details>
+    </Modal>
+  );
 };
 
 export default PlayerModal;

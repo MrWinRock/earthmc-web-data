@@ -1,3 +1,8 @@
+export interface NationBasic {
+  name: string;
+  uuid: string;
+}
+
 export interface NationResident {
   name: string;
   uuid: string;

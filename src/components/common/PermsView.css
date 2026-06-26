@@ -1,0 +1,53 @@
+.perms__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.perms__table th,
+.perms__table td {
+  padding: 0.35rem 0.5rem;
+  text-align: center;
+}
+
+.perms__table thead th {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border);
+}
+
+.perms__table tbody th {
+  text-align: left;
+  color: var(--text-muted);
+  font-weight: 550;
+}
+
+.perms__table tbody tr:not(:last-child) td,
+.perms__table tbody tr:not(:last-child) th {
+  border-bottom: 1px solid var(--border);
+}
+
+.perms__cell {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+}
+
+.perms__cell.is-on {
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+}
+
+.perms__cell.is-off {
+  color: var(--text-faint);
+}
+
+.perms__flags {
+  margin-top: var(--space-3);
+}

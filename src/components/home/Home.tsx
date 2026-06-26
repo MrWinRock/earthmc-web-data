@@ -1,145 +1,178 @@
-import { useEffect, useState } from 'react'
-import { EARTHMC_API_URL } from '../../config';
-import './../Components.css'
-import axios from 'axios';
-
-interface ApiData {
-    version: string;
-    moonPhase: string;
-    timestamps: {
-        newDayTime: number;
-        serverTimeOfDay: number;
-    };
-    status: {
-        hasStorm: boolean;
-        isThundering: boolean;
-    };
-    stats: {
-        time: number;
-        fullTime: number;
-        maxPlayers: number;
-        numOnlinePlayers: number;
-        numOnlineNomads: number;
-        numResidents: number;
-        numNomads: number;
-        numTowns: number;
-        numTownBlocks: number;
-        numNations: number;
-        numQuarters: number;
-        numCuboids: number;
-    };
-    voteParty: {
-        target: number;
-        numRemaining: number;
-    };
-}
-
-const getMoonPhaseEmoji = (moonPhase: string): string => {
-    switch (moonPhase.toUpperCase()) {
-        case 'NEW_MOON':
-            return '🌑';
-        case 'WAXING_CRESCENT':
-            return '🌒';
-        case 'FIRST_QUARTER':
-            return '🌓';
-        case 'WAXING_GIBBOUS':
-            return '🌔';
-        case 'FULL_MOON':
-            return '🌕';
-        case 'WANING_GIBBOUS':
-            return '🌖';
-        case 'LAST_QUARTER':
-            return '🌗';
-        case 'WANING_CRESCENT':
-            return '🌘';
-        default:
-            return '';
-    }
-};
+import { api } from "../../api";
+import { useFetch } from "../../hooks/useFetch";
+import {
+  Badge,
+  Button,
+  Card,
+  ErrorState,
+  ProgressBar,
+  Skeleton,
+  StatCard,
+} from "../ui";
+import {
+  formatMcClock,
+  formatNumber,
+  getMoonPhaseEmoji,
+  titleCase,
+} from "../../utils/format";
+import "./Home.css";
 
 const Home = () => {
-    const [data, setData] = useState<ApiData | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
-    const [showRawData, setShowRawData] = useState(false);
+  const { data, loading, error, reload } = useFetch((signal) =>
+    api.serverStatus(signal)
+  );
 
-    const toggleRawData = () => {
-        setShowRawData(prevShowRawData => !prevShowRawData);
-    }
+  return (
+    <div className="page">
+      <div className="page-head">
+        <h1 className="page-title">
+          EarthMC <span className="accent">Server Status</span>
+        </h1>
+        <p className="page-sub">
+          Live snapshot of the Aurora map — players, towns, nations and world
+          state, straight from the official v4 API.
+        </p>
+      </div>
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await axios.get<ApiData>(`${EARTHMC_API_URL}`);
-                setData(response.data);
-            } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setError(err);
-                } else {
-                    setError(new Error(String(err ?? 'An unknown error occurred')));
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
+      {error && !loading && (
+        <Card>
+          <ErrorState message={error.message} onRetry={reload} />
+        </Card>
+      )}
 
-        fetchData();
-    }, []);
-
-    return (
-        <div className="data-container">
-            {loading && <p>Loading server status...</p>}
-            {error && <p>Error: {error.message}</p>}
-            {data && (
-                <div className="data-display">
-                    <div className='button-container'>
-                        <button onClick={toggleRawData} className='button'>
-                            {showRawData ? 'Hide Raw Data' : 'Show Raw Data'}
-                        </button>
-                        <button onClick={() => window.location.reload()} className='button'>
-                            Refresh Data
-                        </button>
-                    </div>
-
-
-                    {showRawData ? (
-                        <>
-                            <h3>Raw Data:</h3>
-                            <pre>{JSON.stringify(data, null, 2)}</pre>
-                        </>
-                    ) : (
-                        <>
-                            <h2>Server Status</h2>
-                            <p><strong>Version:</strong> {data.version}</p>
-                            <p><strong>Moon Phase:</strong> {data.moonPhase} {getMoonPhaseEmoji(data.moonPhase)} </p>
-                            <p><strong>Storming:</strong> {data.status.hasStorm ? 'Yes' : 'No'}</p>
-                            <p><strong>Thundering:</strong> {data.status.isThundering ? 'Yes' : 'No'}</p>
-
-                            <h3>Vote Party:</h3>
-                            <p><strong>Remaining Votes:</strong> {data.voteParty.numRemaining} / {data.voteParty.target}</p>
-
-                            <h3>Timestamps:</h3>
-                            <p><strong>New Day Time:</strong> {data.timestamps.newDayTime}</p>
-                            <p><strong>Server Time of Day:</strong> {data.timestamps.serverTimeOfDay}</p>
-
-                            <h3>Statistics:</h3>
-                            <p>Online Players: {data.stats.numOnlinePlayers} / {data.stats.maxPlayers}</p>
-                            <p>Online Nomads: {data.stats.numOnlineNomads}</p>
-                            <p>Total Residents: {data.stats.numResidents}</p>
-                            <p>Total Nomads: {data.stats.numNomads}</p>
-                            <p>Towns: {data.stats.numTowns}</p>
-                            <p>Nations: {data.stats.numNations}</p>
-                            <p>Town Blocks: {data.stats.numTownBlocks}</p>
-                            <p>Quarters: {data.stats.numQuarters}</p>
-                            <p>Cuboids: {data.stats.numCuboids}</p>
-                            <p>Current In-game Time: {data.stats.time}</p>
-                            <p>Full In-game Time: {data.stats.fullTime}</p>
-                        </>
-                    )}
-                </div>
-            )}
+      {loading && (
+        <div className="card-grid">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div className="stat" key={i}>
+              <Skeleton width="40%" height="0.8rem" />
+              <Skeleton width="60%" height="1.8rem" />
+            </div>
+          ))}
         </div>
-    )
-}
+      )}
 
-export default Home
+      {data && !loading && (
+        <>
+          {/* ---- Hero / world state ---- */}
+          <Card className="hero">
+            <div className="hero__main">
+              <div className="hero__online">
+                <span className="hero__online-value">
+                  {formatNumber(data.stats.numOnlinePlayers)}
+                  <span className="hero__online-max">
+                    {" "}
+                    / {formatNumber(data.stats.maxPlayers)}
+                  </span>
+                </span>
+                <span className="hero__online-label">players online</span>
+                <ProgressBar
+                  value={data.stats.numOnlinePlayers}
+                  max={data.stats.maxPlayers}
+                />
+              </div>
+              <div className="hero__badges">
+                <Badge tone="info">
+                  {getMoonPhaseEmoji(data.moonPhase)} {titleCase(data.moonPhase)}
+                </Badge>
+                <Badge tone={data.status.hasStorm ? "amber" : "muted"}>
+                  {data.status.hasStorm ? "⛈ Storm" : "☀ Clear"}
+                </Badge>
+                {data.status.isThundering && <Badge tone="amber">⚡ Thunder</Badge>}
+                <Badge tone="green" dot pulse>
+                  v{data.version}
+                </Badge>
+              </div>
+            </div>
+            <div className="hero__time">
+              <span className="hero__time-clock">
+                {formatMcClock(data.timestamps.serverTimeOfDay)}
+              </span>
+              <span className="hero__time-label">in-game time</span>
+            </div>
+          </Card>
+
+          {/* ---- Vote party ---- */}
+          <Card className="voteparty">
+            <div className="voteparty__head">
+              <span>🎉 Vote Party</span>
+              <span className="mono">
+                {formatNumber(
+                  data.voteParty.target - data.voteParty.numRemaining
+                )}{" "}
+                / {formatNumber(data.voteParty.target)}
+              </span>
+            </div>
+            <ProgressBar
+              tone="amber"
+              value={data.voteParty.target - data.voteParty.numRemaining}
+              max={data.voteParty.target}
+            />
+            <p className="voteparty__note">
+              {formatNumber(data.voteParty.numRemaining)} votes until the next
+              party.
+            </p>
+          </Card>
+
+          {/* ---- Stat grid ---- */}
+          <h2 className="section-title">World statistics</h2>
+          <div className="card-grid">
+            <StatCard
+              label="Residents"
+              value={formatNumber(data.stats.numResidents)}
+              icon="🧑"
+            />
+            <StatCard
+              label="Nomads"
+              value={formatNumber(data.stats.numNomads)}
+              icon="🧭"
+              sub={`${formatNumber(data.stats.numOnlineNomads)} online`}
+            />
+            <StatCard
+              label="Towns"
+              value={formatNumber(data.stats.numTowns)}
+              icon="🏘"
+            />
+            <StatCard
+              label="Nations"
+              value={formatNumber(data.stats.numNations)}
+              icon="🚩"
+            />
+            <StatCard
+              label="Town Blocks"
+              value={formatNumber(data.stats.numTownBlocks)}
+              icon="⬛"
+            />
+            <StatCard
+              label="Quarters"
+              value={formatNumber(data.stats.numQuarters)}
+              icon="🏗"
+            />
+            <StatCard
+              label="Cuboids"
+              value={formatNumber(data.stats.numCuboids)}
+              icon="📦"
+            />
+            <StatCard
+              label="Full Time"
+              value={formatNumber(data.stats.fullTime)}
+              icon="⏱"
+              sub="ticks"
+            />
+          </div>
+
+          <div className="toolbar" style={{ marginTop: "1.5rem" }}>
+            <Button variant="ghost" size="sm" onClick={reload}>
+              ↻ Refresh
+            </Button>
+            <details className="raw-details">
+              <summary>Developer · raw JSON</summary>
+              <pre>{JSON.stringify(data, null, 2)}</pre>
+            </details>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default Home;

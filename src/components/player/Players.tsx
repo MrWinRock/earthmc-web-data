@@ -1,250 +1,220 @@
-import { useEffect, useState } from 'react';
-import type { FormEvent } from 'react';
-import './../Components.css'
-import axios from 'axios';
-import type { PlayerDetailed, PlayerBasic } from '../../interfaces/player';
-import { EARTHMC_API_URL } from '../../config';
-import PlayerModal from './PlayerModal';
-
-const PLAYERS_PER_PAGE = 10;
+import { Link } from "react-router-dom";
+import { api } from "../../api";
+import type { PlayerBasic, PlayerDetailed } from "../../interfaces/player";
+import { useEntityBrowser } from "../../hooks/useEntityBrowser";
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  ErrorState,
+  Pagination,
+  PlayerHead,
+  SearchInput,
+  SkeletonCards,
+  Spinner,
+} from "../ui";
+import { formatGold } from "../../utils/format";
+import PlayerModal from "./PlayerModal";
+import "./Players.css";
 
 const Players = () => {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchedPlayerData, setSearchedPlayerData] = useState<PlayerDetailed[] | null>(null);
-    const [loadingSearch, setLoadingSearch] = useState(false);
-    const [errorSearch, setErrorSearch] = useState<Error | null>(null);
-    const [showRawSearchedData, setShowRawSearchedData] = useState(false);
+  const b = useEntityBrowser<PlayerBasic, PlayerDetailed>({
+    list: api.listPlayers,
+    query: api.queryPlayers,
+    nameOf: (p) => p.name,
+    pageSize: 24,
+    lazyList: true,
+  });
 
-    const [allPlayers, setAllPlayers] = useState<PlayerBasic[]>([]);
-    const [loadingAllPlayers, setLoadingAllPlayers] = useState(true);
-    const [errorAllPlayers, setErrorAllPlayers] = useState<Error | null>(null);
+  return (
+    <div className="page">
+      <div className="page-head">
+        <h1 className="page-title">
+          <span className="accent">Players</span>
+        </h1>
+        <p className="page-sub">
+          Search any of EarthMC’s residents by name, UUID or Discord ID. The full
+          registry holds tens of thousands of players, so it only loads on
+          request.
+        </p>
+      </div>
 
-    const [currentPage, setCurrentPage] = useState(1);
+      <div className="toolbar">
+        <SearchInput
+          value={b.searchInput}
+          onChange={b.setSearchInput}
+          onSubmit={b.runSearch}
+          placeholder="Player name, UUID or Discord ID…"
+          ariaLabel="Search players"
+        />
+        <Button variant="primary" onClick={b.runSearch} disabled={b.searchLoading}>
+          {b.searchLoading ? <Spinner /> : "Search"}
+        </Button>
+        {b.results && (
+          <Button variant="ghost" onClick={b.clearSearch}>
+            Clear
+          </Button>
+        )}
+      </div>
 
-    const [modalPlayer, setModalPlayer] = useState<PlayerDetailed | null>(null);
-    const [loadingModalPlayer, setLoadingModalPlayer] = useState(false);
-    const [errorModalPlayer, setErrorModalPlayer] = useState<Error | null>(null);
+      {/* ---- Search results ---- */}
+      {b.searchLoading && (
+        <Card>
+          <div style={{ textAlign: "center", padding: "1rem" }}>
+            <Spinner label="Searching…" />
+          </div>
+        </Card>
+      )}
 
+      {b.searchError && !b.searchLoading && (
+        <Card>
+          <ErrorState message={b.searchError.message} />
+        </Card>
+      )}
 
-    const toggleRawSearchedData = () => {
-        setShowRawSearchedData(prevShowRawData => !prevShowRawData);
-    }
-
-    useEffect(() => {
-        const fetchAllPlayers = async () => {
-            setLoadingAllPlayers(true);
-            setErrorAllPlayers(null);
-            try {
-                const response = await axios.get<PlayerBasic[]>(`${EARTHMC_API_URL}/players`);
-                setAllPlayers(response.data);
-            } catch (err: unknown) {
-                if (err instanceof Error) {
-                    setErrorAllPlayers(err);
-                } else {
-                    setErrorAllPlayers(new Error(String(err ?? 'An unknown error occurred while fetching all players.')));
-                }
-            } finally {
-                setLoadingAllPlayers(false);
-            }
-        };
-        fetchAllPlayers();
-    }, []);
-
-    const handleSearch = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        if (!searchQuery.trim()) {
-            setSearchedPlayerData(null);
-            setErrorSearch(null);
-            return;
-        }
-        setLoadingSearch(true);
-        setErrorSearch(null);
-        setSearchedPlayerData(null);
-
-        try {
-            const response = await axios.post<PlayerDetailed[]>(`${EARTHMC_API_URL}/players`, JSON.stringify({
-                query: [searchQuery.trim()]
-            }), {
-                headers: { 'Content-Type': 'text/plain' }
-            });
-            if (response.data && response.data.length > 0) {
-                setSearchedPlayerData(response.data);
-                if (response.data.length === 1) {
-                    setModalPlayer(response.data[0]);
-                }
-            } else {
-                setSearchedPlayerData([]);
-                setErrorSearch(new Error(`Player "${searchQuery}" not found.`));
-            }
-        } catch (err: unknown) {
-            if (err instanceof Error) {
-                setErrorSearch(err);
-            } else {
-                setErrorSearch(new Error(String(err ?? 'An unknown error occurred while searching for the player.')));
-            }
-        } finally {
-            setLoadingSearch(false);
-        }
-    };
-
-    const openPlayerModalWithDetails = async (playerIdentifier: string) => {
-        setLoadingModalPlayer(true);
-        setErrorModalPlayer(null);
-        setModalPlayer(null);
-        try {
-            const response = await axios.post<PlayerDetailed[]>(`${EARTHMC_API_URL}/players`, JSON.stringify({
-                query: [playerIdentifier]
-            }), {
-                headers: { 'Content-Type': 'text/plain' }
-            });
-            if (response.data && response.data.length > 0) {
-                setModalPlayer(response.data[0]);
-            } else {
-                setErrorModalPlayer(new Error(`Could not fetch details for player: ${playerIdentifier}`));
-            }
-        } catch (err) {
-            if (err instanceof Error) {
-                setErrorModalPlayer(err);
-            } else {
-                setErrorModalPlayer(new Error(String(err ?? `Unknown error fetching details for ${playerIdentifier}`)));
-            }
-        } finally {
-            setLoadingModalPlayer(false);
-        }
-    };
-
-    const closeModal = () => {
-        setModalPlayer(null);
-        setErrorModalPlayer(null);
-    };
-
-    // Pagination logic for allPlayers list
-    const indexOfLastPlayer = currentPage * PLAYERS_PER_PAGE;
-    const indexOfFirstPlayer = indexOfLastPlayer - PLAYERS_PER_PAGE;
-    const currentDisplayedPlayers = allPlayers.slice(indexOfFirstPlayer, indexOfLastPlayer);
-    const totalPages = Math.ceil(allPlayers.length / PLAYERS_PER_PAGE);
-
-    const nextPage = () => {
-        setCurrentPage(prev => Math.min(prev + 1, totalPages));
-    };
-
-    const prevPage = () => {
-        setCurrentPage(prev => Math.max(prev - 1, 1));
-    };
-
-    return (
-        <div className="data-container">
-            <h1>Players</h1>
-            <form onSubmit={handleSearch} className="form-container">
-                <label className="form-label">
-                    Search Player:
-                    <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Enter player name or UUID"
-                        className="form-input"
-                    />
-                </label>
-                <button type="submit" className="button" disabled={loadingSearch}>
-                    {loadingSearch ? 'Searching...' : 'Search Player'}
-                </button>
-            </form>
-
-            {/* Display Search Results */}
-            {loadingSearch && <p>Searching for player...</p>}
-            {errorSearch && !loadingSearch && <p>Search Error: {errorSearch.message}</p>}
-
-            {searchedPlayerData && !loadingSearch && (
-                <div className="data-display search-results-container">
-                    <h2>Search Result:</h2>
-                    <div className='button-container search-results-button-container'>
-                        <button onClick={toggleRawSearchedData} className='button'>
-                            {showRawSearchedData ? 'Hide Raw Searched Data' : 'Show Raw Searched Data'}
-                        </button>
-                        <button onClick={() => { setSearchedPlayerData(null); setErrorSearch(null); setSearchQuery(''); }} className='button'>
-                            Clear Search & Show All Players
-                        </button>
+      {b.results && !b.searchLoading && (
+        <>
+          {b.results.length === 0 ? (
+            <Card>
+              <EmptyState
+                icon="🔍"
+                title="No player found"
+                message={`Nothing matched “${b.searchInput}”.`}
+              />
+            </Card>
+          ) : (
+            <div className="card-grid card-grid--wide">
+              {b.results.map((player) => (
+                <Card
+                  key={player.uuid}
+                  interactive
+                  className="player-card"
+                  onClick={() => b.openWith(player)}
+                >
+                  <PlayerHead id={player.uuid} size={48} alt={player.name} />
+                  <div className="player-card__body">
+                    <div className="player-card__name">
+                      {player.name}
+                      {player.status.isOnline && (
+                        <Badge tone="green" dot>
+                          Online
+                        </Badge>
+                      )}
                     </div>
+                    <div className="player-card__meta">
+                      {player.town.name || "Nomad"}
+                      {player.nation.name ? ` · ${player.nation.name}` : ""}
+                    </div>
+                    <div className="player-card__meta mono">
+                      {formatGold(player.stats.balance)}
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </>
+      )}
 
-                    {showRawSearchedData ? (
-                        <>
-                            <h3>Raw Searched Player Data:</h3>
-                            <pre>{JSON.stringify(searchedPlayerData, null, 2)}</pre>
-                        </>
-                    ) : (
-                        searchedPlayerData.length > 0 ? (
-                            searchedPlayerData.map(player => (
-                                <div key={player.uuid} className="search-item">
-                                    <h3>{player.formattedName} ({player.name})</h3>
-                                    <p><strong>UUID:</strong> {player.uuid}</p>
-                                    <p><strong>Town:</strong> {player.town.name || 'N/A'}</p>
-                                    <p><strong>Nation:</strong> {player.nation.name || 'N/A'}</p>
-                                    <button onClick={() => setModalPlayer(player)} className="button search-details-button">
-                                        View Full Details
-                                    </button>
-                                </div>
-                            ))
-                        ) : (
-                            <p>No player found for "{searchQuery}".</p>
-                        )
-                    )}
+      {/* ---- Default: browse affordances ---- */}
+      {!b.results && !b.searchLoading && (
+        <>
+          {!b.listRequested && (
+            <Card className="browse-card">
+              <EmptyState
+                icon="🧭"
+                title="Find a player"
+                message="Search above, jump to who’s online, or load the full registry."
+              >
+                <div
+                  className="chip-row"
+                  style={{ justifyContent: "center", marginTop: "1rem" }}
+                >
+                  <Link className="btn btn--ghost" to="/online">
+                    View online players
+                  </Link>
+                  <Button variant="primary" onClick={b.loadList}>
+                    Load full registry
+                  </Button>
                 </div>
-            )}
+              </EmptyState>
+            </Card>
+          )}
 
-            {!searchedPlayerData && (
-                <div className="all-list-container">
-                    <h2>All Registered Players ({allPlayers.length})</h2>
-                    {loadingAllPlayers && <p>Loading all players...</p>}
-                    {errorAllPlayers && !loadingAllPlayers && <p>Error loading players list: {errorAllPlayers.message}</p>}
+          {b.listRequested && (
+            <>
+              <div className="toolbar toolbar--between">
+                <SearchInput
+                  value={b.filter}
+                  onChange={b.setFilter}
+                  placeholder="Filter loaded players by name…"
+                  ariaLabel="Filter players"
+                />
+                <span className="pager__info">
+                  {b.filteredCount.toLocaleString()} of{" "}
+                  {b.totalCount.toLocaleString()} players
+                </span>
+              </div>
 
-                    {!loadingAllPlayers && !errorAllPlayers && allPlayers.length > 0 && (
-                        <>
-                            <div className="data-display">
-                                {currentDisplayedPlayers.map(player => (
-                                    <div key={player.uuid} className="all-item">
-                                        <div>
-                                            <p><strong>Name:</strong> {player.name}</p>
-                                            <p><strong>UUID:</strong> {player.uuid}</p>
-                                        </div>
-                                        <button onClick={() => openPlayerModalWithDetails(player.uuid)} className="button">
-                                            View Details
-                                        </button>
-                                    </div>
-                                ))}
-                                {currentDisplayedPlayers.length === 0 && allPlayers.length > 0 && <p>No players to display on this page.</p>}
-                            </div>
+              {b.listLoading && <SkeletonCards count={12} />}
+              {b.listError && !b.listLoading && (
+                <Card>
+                  <ErrorState message={b.listError.message} onRetry={b.reloadList} />
+                </Card>
+              )}
 
-                            {totalPages > 1 && (
-                                <div className="pagination-controls button-container pagination-controls-container">
-                                    <button onClick={prevPage} disabled={currentPage === 1} className="button">
-                                        Previous
-                                    </button>
-                                    <span className="pagination-page-info">
-                                        Page {currentPage} of {totalPages}
-                                    </span>
-                                    <button onClick={nextPage} disabled={currentPage === totalPages} className="button">
-                                        Next
-                                    </button>
-                                </div>
-                            )}
-                        </>
-                    )}
-                    {!loadingAllPlayers && !errorAllPlayers && allPlayers.length === 0 && (
-                        <p>No players found in the registry.</p>
-                    )}
-                </div>
-            )}
+              {!b.listLoading && !b.listError && (
+                <>
+                  <div className="card-grid">
+                    {b.pageItems.map((player) => (
+                      <Card
+                        key={player.uuid}
+                        interactive
+                        className="player-card"
+                        onClick={() => b.openDetail(player.uuid)}
+                      >
+                        <PlayerHead id={player.uuid} size={40} alt={player.name} />
+                        <div className="player-card__body">
+                          <div className="player-card__name">{player.name}</div>
+                          <div className="player-card__meta uuid">
+                            {player.uuid}
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                  <Pagination
+                    page={b.page}
+                    totalPages={b.totalPages}
+                    onChange={b.setPage}
+                  />
+                </>
+              )}
+            </>
+          )}
+        </>
+      )}
 
-            {loadingModalPlayer && <p className="modal-status-text">Loading player details...</p>}
-            {errorModalPlayer && <p className="modal-error-text">Error loading details: {errorModalPlayer.message}</p>}
-            <PlayerModal
-                isOpen={!!modalPlayer && !loadingModalPlayer && !errorModalPlayer}
-                player={modalPlayer}
-                onClose={closeModal}
-            />
+      {b.modalLoading && (
+        <div className="modal-overlay">
+          <div className="card card--pad">
+            <Spinner label="Loading player…" />
+          </div>
         </div>
-    );
-}
+      )}
+      {b.modalError && (
+        <Card style={{ marginTop: "1rem" }}>
+          <ErrorState message={b.modalError.message} />
+        </Card>
+      )}
+      <PlayerModal
+        isOpen={!!b.entity && !b.modalLoading}
+        player={b.entity}
+        onClose={b.closeModal}
+      />
+    </div>
+  );
+};
 
 export default Players;

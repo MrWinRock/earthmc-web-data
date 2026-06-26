@@ -1,102 +1,116 @@
-import React from 'react';
-import type { NationDetailed } from '../../interfaces/nation';
-import './../Components.css';
+import type { NationDetailed } from "../../interfaces/nation";
+import { Badge, DataRow, Modal, Section } from "../ui";
+import { formatDate, formatGold, formatNumber, mapUrl } from "../../utils/format";
 
 interface NationModalProps {
-    nation: NationDetailed | null;
-    isOpen: boolean;
-    onClose: () => void;
+  nation: NationDetailed | null;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const formatDate = (timestamp: number | null): string => {
-    if (timestamp === null) return 'N/A';
-    return new Date(timestamp).toLocaleString();
+const Chips = ({
+  title,
+  items,
+}: {
+  title: string;
+  items: { name: string; uuid: string }[] | undefined;
+}) => {
+  if (!items || items.length === 0) return null;
+  return (
+    <Section title={`${title} (${items.length})`}>
+      <div className="chip-row">
+        {items.map((i) => (
+          <span key={i.uuid} className="badge">
+            {i.name}
+          </span>
+        ))}
+      </div>
+    </Section>
+  );
 };
 
-const formatBoolean = (value: boolean): string => (value ? 'Yes' : 'No');
+const NationModal = ({ nation, isOpen, onClose }: NationModalProps) => {
+  if (!isOpen || !nation) return null;
 
-const renderList = (title: string, items: { name: string; uuid: string }[]) => {
-    if (!items || items.length === 0) return null;
-    return (
-        <>
-            <h3>{title} ({items.length}):</h3>
-            <ul>
-                {items.map((item) => (
-                    <li key={item.uuid}>{item.name} ({item.uuid})</li>
-                ))}
-            </ul>
-        </>
-    );
-};
+  const map = mapUrl({
+    world: nation.coordinates.spawn.world,
+    x: nation.coordinates.spawn.x,
+    y: nation.coordinates.spawn.y,
+    z: nation.coordinates.spawn.z,
+  });
 
-const NationModal: React.FC<NationModalProps> = ({ nation, isOpen, onClose }) => {
-    if (!isOpen || !nation) {
-        return null;
-    }
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        <span style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+          {nation.dynmapColour && (
+            <span
+              className="entity-card__swatch"
+              style={{
+                position: "static",
+                width: 14,
+                height: 14,
+                borderRadius: 4,
+                background: nation.dynmapColour,
+              }}
+            />
+          )}
+          {nation.name}
+        </span>
+      }
+      headerExtra={
+        <a className="btn btn--ghost btn--sm" href={map} target="_blank" rel="noopener noreferrer">
+          🗺 Map
+        </a>
+      }
+    >
+      <div className="chip-row" style={{ marginBottom: "0.5rem" }}>
+        {nation.status.isPublic && <Badge tone="green">Public</Badge>}
+        {nation.status.isOpen && <Badge tone="green">Open</Badge>}
+        {nation.status.isNeutral && <Badge tone="info">Neutral</Badge>}
+      </div>
 
-    const mapLink = `https://map.earthmc.net/?world=${nation.coordinates.spawn.world}&zoom=5&x=${nation.coordinates.spawn.x.toFixed(
-        0
-    )}&y=${nation.coordinates.spawn.y.toFixed(0)}&z=${nation.coordinates.spawn.z.toFixed(0)}`;
+      <div className="datalist">
+        <DataRow label="UUID" mono>
+          {nation.uuid}
+        </DataRow>
+        {nation.board && <DataRow label="Board">{nation.board}</DataRow>}
+        <DataRow label="King">{nation.king.name}</DataRow>
+        <DataRow label="Capital">{nation.capital.name}</DataRow>
+        {nation.wiki && (
+          <DataRow label="Wiki">
+            <a href={nation.wiki} target="_blank" rel="noopener noreferrer">
+              {nation.wiki}
+            </a>
+          </DataRow>
+        )}
+        <DataRow label="Registered">{formatDate(nation.timestamps.registered)}</DataRow>
+      </div>
 
-    return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close-button button" onClick={onClose} aria-label="Close modal">X</button>
-                <h2>{nation.name}</h2>
-                <a href={mapLink} target="_blank" rel="noopener noreferrer">
-                    View on Map
-                </a>
-                <p><strong>UUID:</strong> {nation.uuid}</p>
-                {nation.board && <p><strong>Board:</strong> {nation.board}</p>}
-                {nation.wiki && <p><strong>Wiki:</strong> <a href={nation.wiki} target="_blank" rel="noopener noreferrer">{nation.wiki}</a></p>}
-
-                <h3>King</h3>
-                <p>{nation.king.name} ({nation.king.uuid})</p>
-
-                <h3>Capital</h3>
-                <p>{nation.capital.name} ({nation.capital.uuid})</p>
-
-                <h3>Timestamps</h3>
-                <p><strong>Registered:</strong> {formatDate(nation.timestamps.registered)}</p>
-
-                <h3>Status</h3>
-                <p><strong>Public:</strong> {formatBoolean(nation.status.isPublic)}</p>
-                <p><strong>Open:</strong> {formatBoolean(nation.status.isOpen)}</p>
-                <p><strong>Neutral:</strong> {formatBoolean(nation.status.isNeutral)}</p>
-
-                <h3>Stats</h3>
-                <p><strong>Town Blocks:</strong> {nation.stats.numTownBlocks}</p>
-                <p><strong>Residents:</strong> {nation.stats.numResidents}</p>
-                <p><strong>Towns:</strong> {nation.stats.numTowns}</p>
-                <p><strong>Allies:</strong> {nation.stats.numAllies}</p>
-                <p><strong>Enemies:</strong> {nation.stats.numEnemies}</p>
-                <p><strong>Balance:</strong> {nation.stats.balance} gold</p>
-
-                {renderList("Residents", nation.residents)}
-                {renderList("Towns", nation.towns)}
-                {renderList("Allies", nation.allies)}
-                {renderList("Enemies", nation.enemies)}
-
-                {nation.ranks && Object.keys(nation.ranks).length > 0 && (
-                    <>
-                        <h3>Ranks:</h3>
-                        {Object.entries(nation.ranks).map(([rankName, players]) => (
-                            players.length > 0 && (
-                                <div key={rankName}>
-                                    <p><strong>{rankName}:</strong></p>
-                                    <ul>
-                                        {players.map((playerName: string) => (
-                                            <li key={playerName}>{playerName}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )
-                        ))}
-                    </>
-                )}
-            </div>
+      <Section title="Stats">
+        <div className="datalist">
+          <DataRow label="Towns">{formatNumber(nation.stats.numTowns)}</DataRow>
+          <DataRow label="Residents">{formatNumber(nation.stats.numResidents)}</DataRow>
+          <DataRow label="Town blocks">{formatNumber(nation.stats.numTownBlocks)}</DataRow>
+          <DataRow label="Allies">{formatNumber(nation.stats.numAllies)}</DataRow>
+          <DataRow label="Enemies">{formatNumber(nation.stats.numEnemies)}</DataRow>
+          <DataRow label="Balance">{formatGold(nation.stats.balance)}</DataRow>
         </div>
-    );
+      </Section>
+
+      <Chips title="Towns" items={nation.towns} />
+      <Chips title="Allies" items={nation.allies} />
+      <Chips title="Enemies" items={nation.enemies} />
+      <Chips title="Sanctioned" items={nation.sanctioned} />
+
+      <details>
+        <summary>Developer · raw JSON</summary>
+        <pre>{JSON.stringify(nation, null, 2)}</pre>
+      </details>
+    </Modal>
+  );
 };
 
 export default NationModal;

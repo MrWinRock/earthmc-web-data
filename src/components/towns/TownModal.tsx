@@ -1,129 +1,153 @@
-import React from 'react';
-import type { TownDetailed, TownResident } from '../../interfaces/town';
-import './../Components.css';
+import type { TownDetailed, TownResident } from "../../interfaces/town";
+import { Badge, BoolBadge, DataRow, Modal, Section } from "../ui";
+import { PermsView } from "../common/PermsView";
+import {
+  formatDate,
+  formatGold,
+  formatNumber,
+  mapUrl,
+} from "../../utils/format";
 
 interface TownModalProps {
-    town: TownDetailed | null;
-    isOpen: boolean;
-    onClose: () => void;
+  town: TownDetailed | null;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const formatDate = (timestamp: number | null): string => {
-    if (timestamp === null) return 'N/A';
-    return new Date(timestamp).toLocaleString();
+const ResidentChips = ({
+  title,
+  residents,
+}: {
+  title: string;
+  residents: TownResident[] | undefined;
+}) => {
+  if (!residents || residents.length === 0) return null;
+  return (
+    <Section title={`${title} (${residents.length})`}>
+      <div className="chip-row">
+        {residents.map((r) => (
+          <span key={r.uuid} className="badge">
+            {r.name}
+          </span>
+        ))}
+      </div>
+    </Section>
+  );
 };
 
-const formatBoolean = (value: boolean): string => (value ? 'Yes' : 'No');
+const TownModal = ({ town, isOpen, onClose }: TownModalProps) => {
+  if (!isOpen || !town) return null;
 
-const TownModal: React.FC<TownModalProps> = ({ town, isOpen, onClose }) => {
-    if (!isOpen || !town) {
-        return null;
-    }
+  const map = mapUrl({
+    world: town.coordinates.spawn.world,
+    x: town.coordinates.spawn.x,
+    y: town.coordinates.spawn.y,
+    z: town.coordinates.spawn.z,
+  });
 
-    const renderResidentList = (title: string, residents: TownResident[] | undefined) => {
-        if (!residents || residents.length === 0) return null;
-        return (
-            <>
-                <h3>{title} ({residents.length}):</h3>
-                <ul>
-                    {residents.map((resident) => (
-                        <li key={resident.uuid}>{resident.name} ({resident.uuid})</li>
-                    ))}
-                </ul>
-            </>
-        );
-    };
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={town.name}
+      headerExtra={
+        <a className="btn btn--ghost btn--sm" href={map} target="_blank" rel="noopener noreferrer">
+          🗺 Map
+        </a>
+      }
+    >
+      <div className="chip-row" style={{ marginBottom: "0.5rem" }}>
+        {town.status.isCapital && <Badge tone="amber">Capital</Badge>}
+        {town.status.isRuined && <Badge tone="red">Ruined</Badge>}
+        {town.status.isForSale && (
+          <Badge tone="amber">For sale · {formatGold(town.stats.forSalePrice)}</Badge>
+        )}
+        {town.status.isPublic && <Badge tone="green">Public</Badge>}
+        {town.status.isOpen && <Badge tone="green">Open</Badge>}
+        {town.status.isNeutral && <Badge tone="info">Neutral</Badge>}
+      </div>
 
-    const mapLink = `https://map.earthmc.net/?world=minecraft:overworld&zoom=5&x=${town.coordinates.spawn.x.toFixed(0)}&y=${town.coordinates.spawn.y.toFixed(0)}&z=${town.coordinates.spawn.z.toFixed(0)}`;
+      <div className="datalist">
+        <DataRow label="UUID" mono>
+          {town.uuid}
+        </DataRow>
+        {town.board && <DataRow label="Board">{town.board}</DataRow>}
+        <DataRow label="Mayor">{town.mayor.name}</DataRow>
+        <DataRow label="Nation">{town.nation.name || "—"}</DataRow>
+        <DataRow label="Founder">{town.founder}</DataRow>
+        {town.wiki && (
+          <DataRow label="Wiki">
+            <a href={town.wiki} target="_blank" rel="noopener noreferrer">
+              {town.wiki}
+            </a>
+          </DataRow>
+        )}
+      </div>
 
-    return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <button className="modal-close-button button" onClick={onClose} aria-label="Close modal">X</button>
-                <h2>{town.name}</h2>
-                <a href={mapLink} target="_blank" rel="noopener noreferrer">
-                    View on Map
-                </a>
-                <p><strong>UUID:</strong> {town.uuid}</p>
-                {town.board && <p><strong>Board:</strong> {town.board}</p>}
-                <p><strong>Founder:</strong> {town.founder}</p>
-                {town.wiki && <p><strong>Wiki:</strong> <a href={town.wiki} target="_blank" rel="noopener noreferrer">{town.wiki}</a></p>}
-
-                <h3>Mayor</h3>
-                <p>{town.mayor.name} ({town.mayor.uuid})</p>
-
-                <h3>Nation</h3>
-                <p>{town.nation.name || 'N/A'} {town.nation.uuid && `(${town.nation.uuid})`}</p>
-
-                <h3>Timestamps</h3>
-                <p><strong>Registered:</strong> {formatDate(town.timestamps.registered)}</p>
-                <p><strong>Joined Nation:</strong> {formatDate(town.timestamps.joinedNationAt)}</p>
-                <p><strong>Ruined At:</strong> {formatDate(town.timestamps.ruinedAt)}</p>
-
-                <h3>Status</h3>
-                <p><strong>Public:</strong> {formatBoolean(town.status.isPublic)}</p>
-                <p><strong>Open:</strong> {formatBoolean(town.status.isOpen)}</p>
-                <p><strong>Neutral:</strong> {formatBoolean(town.status.isNeutral)}</p>
-                <p><strong>Capital:</strong> {formatBoolean(town.status.isCapital)}</p>
-                <p><strong>OverClaimed:</strong> {formatBoolean(town.status.isOverClaimed)}</p>
-                <p><strong>Ruined:</strong> {formatBoolean(town.status.isRuined)}</p>
-                <p><strong>For Sale:</strong> {formatBoolean(town.status.isForSale)}</p>
-                <p><strong>Has Nation:</strong> {formatBoolean(town.status.hasNation)}</p>
-                <p><strong>Has Overclaim Shield:</strong> {formatBoolean(town.status.hasOverclaimShield)}</p>
-                <p><strong>Outsiders Can Spawn:</strong> {formatBoolean(town.status.canOutsidersSpawn)}</p>
-
-                <h3>Stats</h3>
-                <p><strong>Town Blocks:</strong> {town.stats.numTownBlocks}</p>
-                <p><strong>Max Town Blocks:</strong> {town.stats.maxTownBlocks}</p>
-                <p><strong>Residents:</strong> {town.stats.numResidents}</p>
-                <p><strong>Trusted:</strong> {town.stats.numTrusted}</p>
-                <p><strong>Outlaws:</strong> {town.stats.numOutlaws}</p>
-                <p><strong>Balance:</strong> {town.stats.balance} gold</p>
-                <p><strong>For Sale Price:</strong> {town.stats.forSalePrice !== null ? `${town.stats.forSalePrice} gold` : 'N/A'}</p>
-
-                <h3>Coordinates</h3>
-                <p><strong>Spawn:</strong> World: {town.coordinates.spawn.world}, X: {town.coordinates.spawn.x.toFixed(2)}, Y: {town.coordinates.spawn.y.toFixed(2)}, Z: {town.coordinates.spawn.z.toFixed(2)}</p>
-                <p><strong>Home Block:</strong> X: {town.coordinates.homeBlock[0]}, Z: {town.coordinates.homeBlock[1]}</p>
-                <p><strong>Town Blocks Count:</strong> {town.coordinates.townBlocks.length}</p>
-
-                {renderResidentList("Residents", town.residents)}
-                {renderResidentList("Trusted", town.trusted)}
-                {renderResidentList("Outlaws", town.outlaws)}
-
-                {town.quarters && town.quarters.length > 0 && (
-                    <>
-                        <h3>Quarters ({town.quarters.length}):</h3>
-                        <ul>
-                            {town.quarters.map((quarterUuid: string) => (
-                                <li key={quarterUuid}>{quarterUuid}</li>
-                            ))}
-                        </ul>
-                    </>
-                )}
-
-                {town.ranks && Object.keys(town.ranks).length > 0 && (
-                    <>
-                        <h3>Ranks:</h3>
-                        {Object.entries(town.ranks).map(([rankName, players]) => (
-                            players.length > 0 && (
-                                <div key={rankName}>
-                                    <p><strong>{rankName}:</strong></p>
-                                    <ul>
-                                        {players.map((playerName: string) => (
-                                            <li key={playerName}>{playerName}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )
-                        ))}
-                    </>
-                )}
-
-                <h3>Permissions:</h3>
-                <pre>{JSON.stringify(town.perms || {}, null, 2)}</pre>
-            </div>
+      <Section title="Stats">
+        <div className="datalist">
+          <DataRow label="Residents">{formatNumber(town.stats.numResidents)}</DataRow>
+          <DataRow label="Town blocks">
+            {formatNumber(town.stats.numTownBlocks)} / {formatNumber(town.stats.maxTownBlocks)}
+          </DataRow>
+          <DataRow label="Trusted">{formatNumber(town.stats.numTrusted)}</DataRow>
+          <DataRow label="Outlaws">{formatNumber(town.stats.numOutlaws)}</DataRow>
+          <DataRow label="Balance">{formatGold(town.stats.balance)}</DataRow>
         </div>
-    );
+      </Section>
+
+      <Section title="Location">
+        <div className="datalist">
+          <DataRow label="Spawn" mono>
+            {town.coordinates.spawn.x.toFixed(0)}, {town.coordinates.spawn.y.toFixed(0)},{" "}
+            {town.coordinates.spawn.z.toFixed(0)}
+          </DataRow>
+          <DataRow label="Home block" mono>
+            {town.coordinates.homeBlock[0]}, {town.coordinates.homeBlock[1]}
+          </DataRow>
+        </div>
+      </Section>
+
+      <Section title="Timestamps">
+        <div className="datalist">
+          <DataRow label="Registered">{formatDate(town.timestamps.registered)}</DataRow>
+          <DataRow label="Joined nation">
+            {formatDate(town.timestamps.joinedNationAt)}
+          </DataRow>
+          {town.timestamps.ruinedAt && (
+            <DataRow label="Ruined">{formatDate(town.timestamps.ruinedAt)}</DataRow>
+          )}
+        </div>
+      </Section>
+
+      <Section title="Status flags">
+        <div className="datalist">
+          <DataRow label="Overclaimed">
+            <BoolBadge value={town.status.isOverClaimed} />
+          </DataRow>
+          <DataRow label="Overclaim shield">
+            <BoolBadge value={town.status.hasOverclaimShield} />
+          </DataRow>
+          <DataRow label="Outsiders spawn">
+            <BoolBadge value={town.status.canOutsidersSpawn} />
+          </DataRow>
+        </div>
+      </Section>
+
+      <ResidentChips title="Residents" residents={town.residents} />
+      <ResidentChips title="Trusted" residents={town.trusted} />
+      <ResidentChips title="Outlaws" residents={town.outlaws} />
+
+      <Section title="Permissions">
+        <PermsView perms={town.perms} />
+      </Section>
+
+      <details>
+        <summary>Developer · raw JSON</summary>
+        <pre>{JSON.stringify(town, null, 2)}</pre>
+      </details>
+    </Modal>
+  );
 };
 
 export default TownModal;

@@ -1,0 +1,118 @@
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+
+.hero__main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1 1 320px;
+}
+
+.hero__online {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.hero__online-value {
+  font-size: clamp(2.2rem, 6vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent-strong);
+}
+
+.hero__online-max {
+  color: var(--text-faint);
+  font-weight: 600;
+  font-size: 0.5em;
+}
+
+.hero__online-label {
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+}
+
+.hero__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.hero__time {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.hero__time-clock {
+  font-family: var(--font-mono);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 700;
+  color: var(--accent-2-strong);
+}
+
+.hero__time-label {
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.voteparty {
+  margin-bottom: var(--space-5);
+}
+
+.voteparty__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+  font-weight: 600;
+}
+
+.voteparty__note {
+  margin: var(--space-2) 0 0;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.raw-details {
+  flex: 1 1 100%;
+}
+
+.raw-details summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 0.3rem 0;
+}
+
+.raw-details pre {
+  margin-top: var(--space-3);
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+  overflow: auto;
+  max-height: 360px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 560px) {
+  .hero__time {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

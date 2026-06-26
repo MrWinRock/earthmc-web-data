@@ -1,0 +1,35 @@
+.player-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.player-card__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.player-card__name {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-card__meta {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.browse-card {
+  max-width: 560px;
+  margin: 0 auto;
+}
