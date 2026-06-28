@@ -1,4 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { isCancel, toError } from "../api/client";
 import { useDebounce } from "./useDebounce";
 import { useFetch } from "./useFetch";
@@ -89,7 +90,9 @@ export function useEntityBrowser<
   }, []);
 
   // ---- Search (POST query) ----------------------------------------------
-  const [searchInput, setSearchInput] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const searchParamVal = searchParams.get("search") || "";
+  const [searchInput, setSearchInput] = useState(searchParamVal);
   const [results, setResults] = useState<TDetailed[] | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<Error | null>(null);
@@ -123,32 +126,72 @@ export function useEntityBrowser<
     [query]
   );
 
-  const runSearch = useCallback(async () => {
-    const q = searchInput.trim();
-    if (!q) {
-      setResults(null);
+  // Synchronize searchInput state with searchParamVal during render (avoids useEffect cascading render)
+  const [prevSearchParamVal, setPrevSearchParamVal] = useState(searchParamVal);
+  if (searchParamVal !== prevSearchParamVal) {
+    setPrevSearchParamVal(searchParamVal);
+    setSearchInput(searchParamVal);
+  }
+
+  // Run search when URL search param changes. All state updates are deferred
+  // after a microtask to avoid synchronous state changes inside the effect body.
+  useEffect(() => {
+    let active = true;
+
+    const startFetch = async () => {
+      await Promise.resolve();
+      if (!active) return;
+
+      if (!searchParamVal) {
+        setResults(null);
+        setSearchError(null);
+        return;
+      }
+
+      setSearchLoading(true);
       setSearchError(null);
-      return;
-    }
-    setSearchLoading(true);
-    setSearchError(null);
-    setResults(null);
-    try {
-      const data = await query([q]);
-      setResults(data ?? []);
-      if (data?.length === 1) setEntity(data[0]);
-    } catch (e) {
-      if (!isCancel(e)) setSearchError(toError(e));
-    } finally {
-      setSearchLoading(false);
-    }
-  }, [searchInput, query]);
+      setResults(null);
+      try {
+        const data = await query([searchParamVal]);
+        if (!active) return;
+        setResults(data ?? []);
+        if (data?.length === 1) setEntity(data[0]);
+      } catch (e) {
+        if (!active) return;
+        if (!isCancel(e)) setSearchError(toError(e));
+      } finally {
+        if (active) {
+          setSearchLoading(false);
+        }
+      }
+    };
+
+    startFetch();
+    return () => {
+      active = false;
+    };
+  }, [searchParamVal, query]);
+
+  const runSearch = useCallback(() => {
+    const q = searchInput.trim();
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (q) {
+        next.set("search", q);
+      } else {
+        next.delete("search");
+      }
+      return next;
+    });
+  }, [searchInput, setSearchParams]);
 
   const clearSearch = useCallback(() => {
-    setResults(null);
-    setSearchError(null);
-    setSearchInput("");
-  }, []);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.delete("search");
+      return next;
+    });
+  }, [setSearchParams]);
 
   return {
     // list

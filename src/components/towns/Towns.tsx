@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { api } from "../../api";
 import type { TownBasic, TownDetailed } from "../../interfaces/town";
 import { useEntityBrowser } from "../../hooks/useEntityBrowser";
@@ -30,8 +31,30 @@ const Towns = () => {
           badges={town.status.isCapital ? <Badge tone="amber">Capital</Badge> : undefined}
           meta={
             <>
-              <span>Mayor · {town.mayor.name}</span>
-              <span>{town.nation.name ? `Nation · ${town.nation.name}` : "Unaffiliated"}</span>
+              <span>
+                Mayor ·{" "}
+                <Link
+                  to={`/players?search=${encodeURIComponent(town.mayor.name)}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {town.mayor.name}
+                </Link>
+              </span>
+              <span>
+                {town.nation.name ? (
+                  <>
+                    Nation ·{" "}
+                    <Link
+                      to={`/nations?search=${encodeURIComponent(town.nation.name)}`}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {town.nation.name}
+                    </Link>
+                  </>
+                ) : (
+                  "Unaffiliated"
+                )}
+              </span>
             </>
           }
           footer={

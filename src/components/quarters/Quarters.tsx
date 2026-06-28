@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { api } from "../../api";
 import type { QuarterBasic, QuarterDetailed } from "../../interfaces/quarter";
 import { useEntityBrowser } from "../../hooks/useEntityBrowser";
@@ -31,8 +32,32 @@ const Quarters = () => {
           badges={<Badge tone="info">{titleCase(quarter.type)}</Badge>}
           meta={
             <>
-              <span>Owner · {quarter.owner.name || "Unowned"}</span>
-              <span>Town · {quarter.town.name || "—"}</span>
+              <span>
+                Owner ·{" "}
+                {quarter.owner.name ? (
+                  <Link
+                    to={`/players?search=${encodeURIComponent(quarter.owner.name)}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {quarter.owner.name}
+                  </Link>
+                ) : (
+                  "Unowned"
+                )}
+              </span>
+              <span>
+                Town ·{" "}
+                {quarter.town.name ? (
+                  <Link
+                    to={`/towns?search=${encodeURIComponent(quarter.town.name)}`}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {quarter.town.name}
+                  </Link>
+                ) : (
+                  "—"
+                )}
+              </span>
             </>
           }
           footer={

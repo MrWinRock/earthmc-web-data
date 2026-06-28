@@ -103,8 +103,27 @@ const Players = () => {
                       )}
                     </div>
                     <div className="player-card__meta">
-                      {player.town.name || "Nomad"}
-                      {player.nation.name ? ` · ${player.nation.name}` : ""}
+                      {player.town.name ? (
+                        <Link
+                          to={`/towns?search=${encodeURIComponent(player.town.name)}`}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          {player.town.name}
+                        </Link>
+                      ) : (
+                        "Nomad"
+                      )}
+                      {player.nation.name && (
+                        <>
+                          {" · "}
+                          <Link
+                            to={`/nations?search=${encodeURIComponent(player.nation.name)}`}
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {player.nation.name}
+                          </Link>
+                        </>
+                      )}
                     </div>
                     <div className="player-card__meta mono">
                       {formatGold(player.stats.balance)}

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { QuarterDetailed } from "../../interfaces/quarter";
 import { Badge, DataRow, Modal, Section } from "../ui";
 import {
@@ -59,9 +60,33 @@ const QuarterModal = ({ quarter, isOpen, onClose }: QuarterModalProps) => {
         <DataRow label="UUID" mono>
           {quarter.uuid}
         </DataRow>
-        <DataRow label="Owner">{quarter.owner.name || "Unowned"}</DataRow>
-        <DataRow label="Town">{quarter.town.name || "—"}</DataRow>
-        <DataRow label="Nation">{quarter.nation.name || "—"}</DataRow>
+        <DataRow label="Owner">
+          {quarter.owner.name ? (
+            <Link to={`/players?search=${encodeURIComponent(quarter.owner.name)}`} onClick={onClose}>
+              {quarter.owner.name}
+            </Link>
+          ) : (
+            "Unowned"
+          )}
+        </DataRow>
+        <DataRow label="Town">
+          {quarter.town.name ? (
+            <Link to={`/towns?search=${encodeURIComponent(quarter.town.name)}`} onClick={onClose}>
+              {quarter.town.name}
+            </Link>
+          ) : (
+            "—"
+          )}
+        </DataRow>
+        <DataRow label="Nation">
+          {quarter.nation.name ? (
+            <Link to={`/nations?search=${encodeURIComponent(quarter.nation.name)}`} onClick={onClose}>
+              {quarter.nation.name}
+            </Link>
+          ) : (
+            "—"
+          )}
+        </DataRow>
       </div>
 
       <Section title="Stats">
@@ -85,9 +110,15 @@ const QuarterModal = ({ quarter, isOpen, onClose }: QuarterModalProps) => {
         <Section title={`Trusted (${quarter.trusted.length})`}>
           <div className="chip-row">
             {quarter.trusted.map((t) => (
-              <span key={t.uuid} className="badge">
+              <Link
+                key={t.uuid}
+                className="badge"
+                style={{ textDecoration: "none" }}
+                to={`/players?search=${encodeURIComponent(t.name)}`}
+                onClick={onClose}
+              >
                 {t.name}
-              </span>
+              </Link>
             ))}
           </div>
         </Section>

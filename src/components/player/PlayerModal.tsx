@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { PlayerDetailed } from "../../interfaces/player";
 import { Badge, BoolBadge, DataRow, Modal, PlayerHead, Section } from "../ui";
 import { PermsView } from "../common/PermsView";
@@ -64,8 +65,24 @@ const PlayerModal = ({ player, isOpen, onClose }: PlayerModalProps) => {
 
       <Section title="Affiliation">
         <div className="datalist">
-          <DataRow label="Town">{player.town.name || "—"}</DataRow>
-          <DataRow label="Nation">{player.nation.name || "—"}</DataRow>
+          <DataRow label="Town">
+            {player.town.name ? (
+              <Link to={`/towns?search=${encodeURIComponent(player.town.name)}`} onClick={onClose}>
+                {player.town.name}
+              </Link>
+            ) : (
+              "—"
+            )}
+          </DataRow>
+          <DataRow label="Nation">
+            {player.nation.name ? (
+              <Link to={`/nations?search=${encodeURIComponent(player.nation.name)}`} onClick={onClose}>
+                {player.nation.name}
+              </Link>
+            ) : (
+              "—"
+            )}
+          </DataRow>
           {player.ranks.townRanks.length > 0 && (
             <DataRow label="Town ranks">
               {player.ranks.townRanks.join(", ")}

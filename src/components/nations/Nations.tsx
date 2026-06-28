@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { api } from "../../api";
 import type { NationBasic, NationDetailed } from "../../interfaces/nation";
 import { useEntityBrowser } from "../../hooks/useEntityBrowser";
@@ -29,8 +30,24 @@ const Nations = () => {
           title={nation.name}
           meta={
             <>
-              <span>King · {nation.king.name}</span>
-              <span>Capital · {nation.capital.name}</span>
+              <span>
+                King ·{" "}
+                <Link
+                  to={`/players?search=${encodeURIComponent(nation.king.name)}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {nation.king.name}
+                </Link>
+              </span>
+              <span>
+                Capital ·{" "}
+                <Link
+                  to={`/towns?search=${encodeURIComponent(nation.capital.name)}`}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {nation.capital.name}
+                </Link>
+              </span>
             </>
           }
           footer={

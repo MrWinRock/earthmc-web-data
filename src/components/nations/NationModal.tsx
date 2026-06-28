@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { NationDetailed } from "../../interfaces/nation";
 import { Badge, DataRow, Modal, Section } from "../ui";
 import { formatDate, formatGold, formatNumber, mapUrl } from "../../utils/format";
@@ -11,18 +12,28 @@ interface NationModalProps {
 const Chips = ({
   title,
   items,
+  basePath,
+  onClose,
 }: {
   title: string;
   items: { name: string; uuid: string }[] | undefined;
+  basePath: string;
+  onClose: () => void;
 }) => {
   if (!items || items.length === 0) return null;
   return (
     <Section title={`${title} (${items.length})`}>
       <div className="chip-row">
         {items.map((i) => (
-          <span key={i.uuid} className="badge">
+          <Link
+            key={i.uuid}
+            className="badge"
+            style={{ textDecoration: "none" }}
+            to={`${basePath}?search=${encodeURIComponent(i.name)}`}
+            onClick={onClose}
+          >
             {i.name}
-          </span>
+          </Link>
         ))}
       </div>
     </Section>
@@ -77,8 +88,16 @@ const NationModal = ({ nation, isOpen, onClose }: NationModalProps) => {
           {nation.uuid}
         </DataRow>
         {nation.board && <DataRow label="Board">{nation.board}</DataRow>}
-        <DataRow label="King">{nation.king.name}</DataRow>
-        <DataRow label="Capital">{nation.capital.name}</DataRow>
+        <DataRow label="King">
+          <Link to={`/players?search=${encodeURIComponent(nation.king.name)}`} onClick={onClose}>
+            {nation.king.name}
+          </Link>
+        </DataRow>
+        <DataRow label="Capital">
+          <Link to={`/towns?search=${encodeURIComponent(nation.capital.name)}`} onClick={onClose}>
+            {nation.capital.name}
+          </Link>
+        </DataRow>
         {nation.wiki && (
           <DataRow label="Wiki">
             <a href={nation.wiki} target="_blank" rel="noopener noreferrer">
@@ -100,10 +119,10 @@ const NationModal = ({ nation, isOpen, onClose }: NationModalProps) => {
         </div>
       </Section>
 
-      <Chips title="Towns" items={nation.towns} />
-      <Chips title="Allies" items={nation.allies} />
-      <Chips title="Enemies" items={nation.enemies} />
-      <Chips title="Sanctioned" items={nation.sanctioned} />
+      <Chips title="Towns" items={nation.towns} basePath="/towns" onClose={onClose} />
+      <Chips title="Allies" items={nation.allies} basePath="/nations" onClose={onClose} />
+      <Chips title="Enemies" items={nation.enemies} basePath="/nations" onClose={onClose} />
+      <Chips title="Sanctioned" items={nation.sanctioned} basePath="/towns" onClose={onClose} />
 
       <details>
         <summary>Developer · raw JSON</summary>

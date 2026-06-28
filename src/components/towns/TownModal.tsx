@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { TownDetailed, TownResident } from "../../interfaces/town";
 import { Badge, BoolBadge, DataRow, Modal, Section } from "../ui";
 import { PermsView } from "../common/PermsView";
@@ -17,18 +18,26 @@ interface TownModalProps {
 const ResidentChips = ({
   title,
   residents,
+  onClose,
 }: {
   title: string;
   residents: TownResident[] | undefined;
+  onClose: () => void;
 }) => {
   if (!residents || residents.length === 0) return null;
   return (
     <Section title={`${title} (${residents.length})`}>
       <div className="chip-row">
         {residents.map((r) => (
-          <span key={r.uuid} className="badge">
+          <Link
+            key={r.uuid}
+            className="badge"
+            style={{ textDecoration: "none" }}
+            to={`/players?search=${encodeURIComponent(r.name)}`}
+            onClick={onClose}
+          >
             {r.name}
-          </span>
+          </Link>
         ))}
       </div>
     </Section>
@@ -72,9 +81,25 @@ const TownModal = ({ town, isOpen, onClose }: TownModalProps) => {
           {town.uuid}
         </DataRow>
         {town.board && <DataRow label="Board">{town.board}</DataRow>}
-        <DataRow label="Mayor">{town.mayor.name}</DataRow>
-        <DataRow label="Nation">{town.nation.name || "—"}</DataRow>
-        <DataRow label="Founder">{town.founder}</DataRow>
+        <DataRow label="Mayor">
+          <Link to={`/players?search=${encodeURIComponent(town.mayor.name)}`} onClick={onClose}>
+            {town.mayor.name}
+          </Link>
+        </DataRow>
+        <DataRow label="Nation">
+          {town.nation.name ? (
+            <Link to={`/nations?search=${encodeURIComponent(town.nation.name)}`} onClick={onClose}>
+              {town.nation.name}
+            </Link>
+          ) : (
+            "—"
+          )}
+        </DataRow>
+        <DataRow label="Founder">
+          <Link to={`/players?search=${encodeURIComponent(town.founder)}`} onClick={onClose}>
+            {town.founder}
+          </Link>
+        </DataRow>
         {town.wiki && (
           <DataRow label="Wiki">
             <a href={town.wiki} target="_blank" rel="noopener noreferrer">
@@ -134,9 +159,9 @@ const TownModal = ({ town, isOpen, onClose }: TownModalProps) => {
         </div>
       </Section>
 
-      <ResidentChips title="Residents" residents={town.residents} />
-      <ResidentChips title="Trusted" residents={town.trusted} />
-      <ResidentChips title="Outlaws" residents={town.outlaws} />
+      <ResidentChips title="Residents" residents={town.residents} onClose={onClose} />
+      <ResidentChips title="Trusted" residents={town.trusted} onClose={onClose} />
+      <ResidentChips title="Outlaws" residents={town.outlaws} onClose={onClose} />
 
       <Section title="Permissions">
         <PermsView perms={town.perms} />
